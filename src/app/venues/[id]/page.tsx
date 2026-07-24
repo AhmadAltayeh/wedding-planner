@@ -2,14 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getVenue } from "@/lib/actions/venues";
 import { getSettings } from "@/lib/actions/settings";
-import { PageHeader, Card, Badge, Button } from "@/components/ui";
+import { PageHeader, Card, Button } from "@/components/ui";
 import { VenueDatesSection } from "@/components/venue-dates-section";
 import { VenueExtras } from "@/components/venue-extras";
 import { VenueMediaSection } from "@/components/venue-media";
+import { VenueDetailMeta } from "@/components/venue-detail-meta";
 import { LocationBlock, ContactBlock, InstagramBlock, WebsiteBlock, DjLightsPricing } from "@/components/venue-location";
-import { formatDate, formatJod } from "@/lib/utils";
+import { formatJod } from "@/lib/utils";
 import { venueEstimateBreakdown } from "@/lib/venue-math";
-import { SERVICE_STYLES, statusLabel } from "@/lib/constants";
 import { Pencil } from "lucide-react";
 
 export default async function VenueDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -19,13 +19,11 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
 
   const guests = settings.guestEstimate;
   const estimate = venueEstimateBreakdown(venue, guests);
-  const style = SERVICE_STYLES.find((s) => s.value === venue.serviceStyle)?.label;
 
   return (
     <div>
       <PageHeader
         title={venue.name}
-        subtitle={style ?? undefined}
         action={
           <Link href={`/venues/${id}/edit`}>
             <Button variant="secondary" className="gap-1 px-3">
@@ -36,7 +34,14 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
         }
       />
 
-      <Badge className="mt-4">{statusLabel(venue.status)}</Badge>
+      <VenueDetailMeta
+        status={venue.status}
+        serviceStyle={venue.serviceStyle}
+        venueType={venue.venueType}
+        rating={venue.rating}
+        visitedAt={venue.visitedAt}
+      />
+
       <LocationBlock location={venue.location} />
 
       <Card className="mt-4">
@@ -100,10 +105,6 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
           <p className="text-sm text-ink-muted">Notes</p>
           <p className="mt-1 whitespace-pre-wrap text-sm">{venue.notes}</p>
         </Card>
-      )}
-
-      {venue.visitedAt && (
-        <p className="mt-3 text-sm text-ink-muted">Visited {formatDate(venue.visitedAt)}</p>
       )}
 
       <VenueExtras venueId={venue.id} addons={venue.addons} collapsible />

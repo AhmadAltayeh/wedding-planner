@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition, useState } from "react";
 import { addVenueDate, removeVenueDate } from "@/lib/actions/venues";
 import { Button, Card, Input } from "@/components/ui";
-import { formatDate } from "@/lib/utils";
+import { formatDateWithDay } from "@/lib/utils";
 import type { VenueDate } from "@prisma/client";
 import { CalendarDays, Trash2 } from "lucide-react";
 
@@ -54,7 +54,7 @@ export function VenueDatesSection({
                 }`}
               >
                 <div>
-                  <span className="font-semibold text-ink">{formatDate(d.date)}</span>
+                  <span className="font-semibold text-ink">{formatDateWithDay(d.date)}</span>
                   {d.note && <p className="text-ink-muted">{d.note}</p>}
                   {matchesWedding && (
                     <p className="mt-0.5 text-xs font-semibold text-sage-dark">Matches your wedding date</p>

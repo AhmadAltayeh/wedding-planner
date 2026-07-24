@@ -3,7 +3,7 @@ import { listVenues } from "@/lib/actions/venues";
 import { getSettings } from "@/lib/actions/settings";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/ui";
 import { FabLink } from "@/components/fab-link";
-import { formatDate, formatJod } from "@/lib/utils";
+import { formatDate, formatDateWithShortDay, formatJod } from "@/lib/utils";
 import { estimateVenueTotal } from "@/lib/venue-math";
 import { SERVICE_STYLES, statusColor, statusLabel } from "@/lib/constants";
 
@@ -67,7 +67,7 @@ export default async function VenuesPage() {
                         <span className="text-ink-muted">Dates: </span>
                         {v.availableDates
                           .slice(0, 3)
-                          .map((d) => formatDate(d.date))
+                          .map((d) => formatDateWithShortDay(d.date))
                           .join(" · ")}
                         {v.availableDates.length > 3 && ` +${v.availableDates.length - 3} more`}
                       </p>
