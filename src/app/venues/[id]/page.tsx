@@ -73,8 +73,16 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
                 </li>
               )}
               {estimate.hallJod > 0 && <li>Hall {formatJod(estimate.hallJod)}</li>}
-              {estimate.djJod > 0 && <li>DJ {formatJod(estimate.djJod)}</li>}
-              {estimate.lightsJod > 0 && <li>Lights {formatJod(estimate.lightsJod)}</li>}
+              {estimate.djJod > 0 && (
+                <li>
+                  DJ{venue.includesDj ? " (in package)" : ""} {formatJod(estimate.djJod)}
+                </li>
+              )}
+              {estimate.lightsJod > 0 && (
+                <li>
+                  Lights{venue.includesLights ? " (in package)" : ""} {formatJod(estimate.lightsJod)}
+                </li>
+              )}
               {estimate.addonsJod > 0 && <li>Add-ons {formatJod(estimate.addonsJod)}</li>}
             </ul>
           </div>

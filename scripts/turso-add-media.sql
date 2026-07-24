@@ -1,6 +1,5 @@
--- Run once on Turso if tables existed before media / contact updates:
--- turso db shell wedding-planner < scripts/turso-add-media.sql
--- (Ignore errors for columns/tables that already exist.)
+-- Prefer: npm run db:migrate:turso
+-- (stdin redirect often does NOT run all statements in Turso CLI)
 
 ALTER TABLE VenueMedia ADD COLUMN blobUrl TEXT;
 ALTER TABLE Venue ADD COLUMN contactName TEXT;

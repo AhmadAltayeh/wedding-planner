@@ -203,8 +203,7 @@ export function VenueForm({
             inputMode="decimal"
             value={form.djPriceJod ?? ""}
             onChange={(e) => setForm({ ...form, djPriceJod: num(e.target.value) })}
-            disabled={form.includesDj}
-            placeholder={form.includesDj ? "Included" : ""}
+            placeholder="Added to estimated total"
           />
         </Field>
         <Field label="Lights price (JOD)">
@@ -213,8 +212,7 @@ export function VenueForm({
             inputMode="decimal"
             value={form.lightsPriceJod ?? ""}
             onChange={(e) => setForm({ ...form, lightsPriceJod: num(e.target.value) })}
-            disabled={form.includesLights}
-            placeholder={form.includesLights ? "Included" : ""}
+            placeholder="Added to estimated total"
           />
         </Field>
       </div>
@@ -253,8 +251,8 @@ export function VenueForm({
       <Field label="Included in base package">
         <div className="grid gap-2">
           {boolField("includesFood", "Food / menu", form, setForm)}
-          {boolField("includesDj", "DJ (included — no extra price)", form, setForm)}
-          {boolField("includesLights", "Lights (included)", form, setForm)}
+          {boolField("includesDj", "DJ included in per-person quote", form, setForm)}
+          {boolField("includesLights", "Lights included in per-person quote", form, setForm)}
           {boolField("includesTables", "Tables", form, setForm)}
           {boolField("includesChairs", "Chairs", form, setForm)}
           {boolField("includesParking", "Parking", form, setForm)}

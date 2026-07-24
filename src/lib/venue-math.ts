@@ -41,9 +41,9 @@ export function venueEstimateBreakdown(
   const hallJod = venue.hallRentalJod ?? 0;
 
   const djJod =
-    venue.djPriceJod != null && !venue.includesDj ? venue.djPriceJod : 0;
+    venue.djPriceJod != null && venue.djPriceJod > 0 ? venue.djPriceJod : 0;
   const lightsJod =
-    venue.lightsPriceJod != null && !venue.includesLights ? venue.lightsPriceJod : 0;
+    venue.lightsPriceJod != null && venue.lightsPriceJod > 0 ? venue.lightsPriceJod : 0;
 
   const addonsJod = addonTotal(venue.addons, guests);
 

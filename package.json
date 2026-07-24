@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:push:turso": "bash scripts/push-schema-turso.sh",
     "db:sync:turso": "npx tsx scripts/sync-local-to-turso.ts",
+    "db:migrate:turso": "bash scripts/turso-migrate.sh",
     "db:studio": "prisma studio"
   },
   "dependencies": {

@@ -43,6 +43,15 @@ export function LocationBlock({ location }: { location: string | null | undefine
   );
 }
 
+function djLightsLine(included: boolean, priceJod: number | null): string {
+  if (priceJod != null && priceJod > 0) {
+    const amount = formatJod(priceJod);
+    return included ? `${amount} (included in package)` : amount;
+  }
+  if (included) return "Included — add JOD amount in edit to count in total";
+  return "Not included / TBD";
+}
+
 export function DjLightsPricing({
   includesDj,
   includesLights,
@@ -54,16 +63,13 @@ export function DjLightsPricing({
   djPriceJod: number | null;
   lightsPriceJod: number | null;
 }) {
-  if (!includesDj && djPriceJod == null && !includesLights && lightsPriceJod == null) return null;
+  const showDj = includesDj || djPriceJod != null;
+  const showLights = includesLights || lightsPriceJod != null;
+  if (!showDj && !showLights) return null;
   return (
     <div className="mt-2 space-y-1 text-sm text-slate-700">
-      <p>
-        DJ: {includesDj ? "Included" : djPriceJod != null ? formatJod(djPriceJod) : "Not included / TBD"}
-      </p>
-      <p>
-        Lights:{" "}
-        {includesLights ? "Included" : lightsPriceJod != null ? formatJod(lightsPriceJod) : "Not included / TBD"}
-      </p>
+      {showDj && <p>DJ: {djLightsLine(includesDj, djPriceJod)}</p>}
+      {showLights && <p>Lights: {djLightsLine(includesLights, lightsPriceJod)}</p>}
     </div>
   );
 }

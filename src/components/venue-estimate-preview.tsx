@@ -36,13 +36,19 @@ export function VenueEstimatePreview({
         )}
         {b.djJod > 0 && (
           <li className="flex justify-between gap-2">
-            <span>DJ</span>
+            <span>
+              DJ
+              {venue.includesDj ? " (in package)" : ""}
+            </span>
             <span className="font-medium text-ink">{formatJod(b.djJod)}</span>
           </li>
         )}
         {b.lightsJod > 0 && (
           <li className="flex justify-between gap-2">
-            <span>Lights</span>
+            <span>
+              Lights
+              {venue.includesLights ? " (in package)" : ""}
+            </span>
             <span className="font-medium text-ink">{formatJod(b.lightsJod)}</span>
           </li>
         )}
@@ -53,11 +59,6 @@ export function VenueEstimatePreview({
           </li>
         )}
       </ul>
-      {(venue.includesDj || venue.includesLights) && (
-        <p className="mt-2 text-xs text-ink-muted">
-          DJ/lights marked “included” are not added again on top of per-person pricing.
-        </p>
-      )}
     </div>
   );
 }

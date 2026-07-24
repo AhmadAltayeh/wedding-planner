@@ -14,12 +14,17 @@ export async function GET() {
 
   try {
     await prisma.weddingSettings.findUnique({ where: { id: "default" } });
+    await prisma.venue.findFirst({ select: { id: true, contactName: true } });
     return Response.json({ ok: true, database: "connected" });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    const hint = message.includes("no such table")
-      ? "Tables missing on Turso. On your Mac run: npm run db:push:turso -- YOUR_DB_NAME"
-      : "Check Turso URL/token and redeploy.";
+    let hint = "Check Turso URL/token and redeploy.";
+    if (message.includes("no such table")) {
+      hint = "Tables missing on Turso. On your Mac: npm run db:push:turso -- wedding-planner";
+    } else if (message.includes("contactName") || message.includes("blobUrl") || message.includes("PlannerMedia")) {
+      hint =
+        "Schema is behind the app. On your Mac: npm run db:migrate:turso (not turso shell < file.sql)";
+    }
 
     return Response.json({ ok: false, error: message, hint }, { status: 500 });
   }

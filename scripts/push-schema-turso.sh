@@ -29,9 +29,9 @@ fi
 EXISTING=$(turso db shell "$DB_NAME" "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='WeddingSettings';" 2>/dev/null | tail -1 | tr -d '[:space:]' || echo "0")
 
 if [[ "$EXISTING" == "1" ]]; then
-  echo "Tables already exist on Turso (WeddingSettings found). Nothing to do."
-  echo "Add data on Vercel, or copy from your Mac: npm run db:sync:turso"
-  exit 0
+  echo "Tables already exist on Turso. Running incremental migration (new columns/tables)…"
+  npx tsx scripts/migrate-turso-incremental.ts
+  exit $?
 fi
 
 SQL_FILE="$(mktemp).sql"
