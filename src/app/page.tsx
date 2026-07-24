@@ -4,20 +4,48 @@ import { listVenues } from "@/lib/actions/venues";
 import { listPlanners } from "@/lib/actions/planners";
 import { listTasks } from "@/lib/actions/tasks";
 import { CoupleHero } from "@/components/couple-hero";
+import { DatabaseSetupHelp } from "@/components/database-setup-help";
 import { displayNames } from "@/lib/brand";
 import { Card, Badge, Button, SectionTitle } from "@/components/ui";
 import { formatJod } from "@/lib/utils";
 import { estimateVenueTotal } from "@/lib/venue-math";
 import { statusColor, statusLabel } from "@/lib/constants";
 import { Building2, MapPin } from "lucide-react";
+import { isProductionDatabaseConfigured } from "@/lib/prisma";
 
 export default async function HomePage() {
-  const [settings, venues, planners, tasks] = await Promise.all([
-    getSettings(),
-    listVenues(),
-    listPlanners(),
-    listTasks(),
-  ]);
+  if (!isProductionDatabaseConfigured()) {
+    const { groom, bride } = displayNames("Ahmad", "Nour");
+    return (
+      <div>
+        <CoupleHero groom={groom} bride={bride} />
+        <DatabaseSetupHelp detail="TURSO_DATABASE_URL or TURSO_AUTH_TOKEN is not set on Vercel." />
+      </div>
+    );
+  }
+
+  let settings;
+  let venues;
+  let planners;
+  let tasks;
+
+  try {
+    [settings, venues, planners, tasks] = await Promise.all([
+      getSettings(),
+      listVenues(),
+      listPlanners(),
+      listTasks(),
+    ]);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    const { groom, bride } = displayNames("Ahmad", "Nour");
+    return (
+      <div>
+        <CoupleHero groom={groom} bride={bride} />
+        <DatabaseSetupHelp detail={detail} />
+      </div>
+    );
+  }
 
   const { groom, bride } = displayNames(settings.partnerOne, settings.partnerTwo);
   const guests = settings.guestEstimate;

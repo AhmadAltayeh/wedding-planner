@@ -11,6 +11,7 @@
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:push:turso": "bash scripts/push-schema-turso.sh",
+    "db:sync:turso": "npx tsx scripts/sync-local-to-turso.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
     "eslint-config-next": "15.3.8",
     "prisma": "^6.9.0",
     "tailwindcss": "^4",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }

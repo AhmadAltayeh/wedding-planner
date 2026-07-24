@@ -88,7 +88,20 @@ npm run db:push:turso -- YOUR_DB_NAME
 3. On Vercel → Environment Variables, set `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, plus `APP_PASSWORD` and `SESSION_TOKEN`.
 4. Connect GitHub and deploy.
 
-Local data is **not** copied automatically — re-enter venues on production or export/import later.
+Local data is **not** copied automatically — re-enter venues on production or run **`npm run db:sync:turso`** (see below).
+
+### Copy data from your Mac to Turso
+
+If you already added venues locally and want them on Vercel:
+
+```bash
+export TURSO_DATABASE_URL="libsql://..."
+export TURSO_AUTH_TOKEN="..."
+npm run db:push:turso -- wedding-planner   # tables first, if not done yet
+npm run db:sync:turso                      # copy rows from prisma/dev.db
+```
+
+Uploaded photos/PDFs stay on your Mac unless you use cloud file storage later.
 
 Run `npm run dev` on your laptop and bookmark it on your phone via LAN, or use a tunnel (ngrok, Cloudflare Tunnel).
 
