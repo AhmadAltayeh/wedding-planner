@@ -40,7 +40,17 @@ export function VenueMediaSection({
 
   const photos = venueGalleryPhotos(media);
   const menus = media.filter((m) => m.kind === "menu");
+  const menuImages = menus.filter((m) => isImageMime(m.mimeType));
+  const menuFiles = menus.filter((m) => !isImageMime(m.mimeType));
   const showUpload = !locked;
+
+  function deleteMedia(mediaId: string) {
+    if (!venueId) return;
+    startTransition(async () => {
+      await deleteVenueMedia(mediaId, venueId);
+      await refreshMedia();
+    });
+  }
 
   function requireVenue(): boolean {
     if (locked || !venueId) {
@@ -108,13 +118,7 @@ export function VenueMediaSection({
           <PhotoGallery
             photos={photos}
             onDelete={
-              venueId && showUpload
-                ? (mediaId) =>
-                    startTransition(async () => {
-                      await deleteVenueMedia(mediaId, venueId);
-                      await refreshMedia();
-                    })
-                : undefined
+              venueId && showUpload ? (mediaId) => deleteMedia(mediaId) : undefined
             }
           />
         ) : (
@@ -158,50 +162,57 @@ export function VenueMediaSection({
   const menuSection = (
     <section>
       <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Catering menu</h3>
-        {menus.length > 0 ? (
-          <ul className="mb-3 space-y-3">
-            {menus.map((m) => {
-              const src = mediaSrc(m);
-              const isPdf = m.mimeType === "application/pdf" || m.originalName.toLowerCase().endsWith(".pdf");
-              return (
-                <li key={m.id} className="overflow-hidden rounded-xl border border-gold-soft/40 bg-blush/20">
-                  {isImageMime(m.mimeType) && (
-                    <a href={src} target="_blank" rel="noreferrer">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={src} alt={m.originalName} className="max-h-48 w-full object-cover" />
-                    </a>
-                  )}
-                  <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-                    <a href={src} target="_blank" rel="noreferrer" className="flex min-w-0 items-center gap-2 font-medium text-sage">
-                      <FileText className="h-5 w-5 shrink-0 text-gold" />
-                      <span className="truncate">{m.originalName}</span>
-                      <span className="shrink-0 text-xs text-ink-muted">{isPdf ? "PDF" : "Image"}</span>
-                    </a>
+      {menuImages.length > 0 && (
+        <div className="mb-4">
+          <PhotoGallery
+            photos={menuImages}
+            onDelete={venueId && showUpload ? (mediaId) => deleteMedia(mediaId) : undefined}
+          />
+        </div>
+      )}
+      {menuFiles.length > 0 ? (
+        <ul className="mb-3 space-y-3">
+          {menuFiles.map((m) => {
+            const src = mediaSrc(m);
+            const isPdf =
+              m.mimeType === "application/pdf" || m.originalName.toLowerCase().endsWith(".pdf");
+            return (
+              <li key={m.id} className="overflow-hidden rounded-xl border border-gold-soft/40 bg-blush/20">
+                <div className="flex items-center justify-between gap-2 px-3 py-2.5">
+                  <a
+                    href={src}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex min-w-0 items-center gap-2 font-medium text-sage"
+                  >
+                    <FileText className="h-5 w-5 shrink-0 text-gold" />
+                    <span className="truncate">{m.originalName}</span>
+                    <span className="shrink-0 text-xs text-ink-muted">{isPdf ? "PDF" : "File"}</span>
+                  </a>
+                  {showUpload && (
                     <button
                       type="button"
                       className="shrink-0 text-sage"
-                      onClick={() =>
-                        startTransition(async () => {
-                          if (!venueId) return;
-                          await deleteVenueMedia(m.id, venueId);
-                          await refreshMedia();
-                        })
-                      }
+                      aria-label="Remove file"
+                      onClick={() => deleteMedia(m.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="mb-3 text-sm text-ink-muted">Upload the PDF or a photo of the menu they sent you.</p>
-        )}
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : menuImages.length === 0 ? (
+        <p className="mb-3 text-sm text-ink-muted">Upload the PDF or a photo of the menu they sent you.</p>
+      ) : null}
+      {showUpload && (
+        <>
         <button
           type="button"
           disabled={pending}
-          className={pickClass}
+          className={`${pickClass}${menuImages.length > 0 || menuFiles.length > 0 ? " mt-3" : ""}`}
           onClick={() => {
             if (!requireVenue()) return;
             menuInputRef.current?.click();
@@ -221,6 +232,8 @@ export function VenueMediaSection({
             e.target.value = "";
           }}
         />
+        </>
+      )}
     </section>
   );
 
