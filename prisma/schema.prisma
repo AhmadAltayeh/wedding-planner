@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  // Always `file:` — required by Prisma CLI. Turso is used at runtime via TURSO_* env vars.
   url      = env("DATABASE_URL")
 }
 

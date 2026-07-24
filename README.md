@@ -44,21 +44,51 @@ Uploads are stored in the `uploads/` folder on disk — works when you run local
 
 Vercel’s filesystem is read-only, so production needs a hosted database.
 
-### Option A — Turso (recommended, free tier)
+### Database: local vs Turso (Vercel)
 
-1. Create a database at [turso.tech](https://turso.tech).
-2. Copy the connection URL (`libsql://...`) and auth token.
-3. In Vercel → Project → Settings → Environment Variables:
-   - `DATABASE_URL` = your Turso URL (with `?authToken=...` if required by your setup)
-4. Push schema once from your machine:
+**`DATABASE_URL` must always be `file:./dev.db` on your Mac** so `prisma db push` works.  
+Do **not** put `libsql://` in `DATABASE_URL` — Prisma will error with P1012.
+
+For Vercel, use **separate** Turso variables (runtime):
+
+| Variable | Where |
+|----------|--------|
+| `DATABASE_URL` | `file:./dev.db` locally only; on Vercel you can omit or set the same (not used when Turso is set) |
+| `TURSO_DATABASE_URL` | `libsql://….turso.io` from Turso dashboard |
+| `TURSO_AUTH_TOKEN` | Turso database token |
+
+1. Install the **Turso Cloud CLI** (not Homebrew `turso`, which is a different local tool):
 
 ```bash
-DATABASE_URL="libsql://..." npx prisma db push
+curl -sSfL https://get.tur.so/install.sh | bash
+source ~/.zshrc
+turso --version
+turso auth login
 ```
 
-5. Connect the GitHub repo to Vercel and deploy.
+If `turso` is still not found, run it directly:
 
-### Option B — Keep it local only
+```bash
+/Users/ahmad.altayeh/.turso/turso auth login
+```
+
+(Add `export PATH="$PATH:$HOME/.turso"` to `~/.zshrc` if needed.)
+
+2. Create a database:
+2. Push **schema** to Turso (one time, or after schema changes):
+
+```bash
+export TURSO_DATABASE_URL="libsql://YOUR-DB-org.turso.io"
+export TURSO_AUTH_TOKEN="your-token"
+npm run db:push:turso -- YOUR_DB_NAME
+```
+
+(`YOUR_DB_NAME` is from `turso db list`.)
+
+3. On Vercel → Environment Variables, set `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, plus `APP_PASSWORD` and `SESSION_TOKEN`.
+4. Connect GitHub and deploy.
+
+Local data is **not** copied automatically — re-enter venues on production or export/import later.
 
 Run `npm run dev` on your laptop and bookmark it on your phone via LAN, or use a tunnel (ngrok, Cloudflare Tunnel).
 

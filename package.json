@@ -10,14 +10,17 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
+    "db:push:turso": "bash scripts/push-schema-turso.sh",
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "@prisma/adapter-libsql": "^6.9.0",
     "@prisma/client": "^6.9.0",
-  "clsx": "^2.1.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.511.0",
-    "next": "15.3.3",
+    "next": "15.3.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.3.0",
@@ -30,7 +33,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.3.3",
+    "eslint-config-next": "15.3.8",
     "prisma": "^6.9.0",
     "tailwindcss": "^4",
     "typescript": "^5"
