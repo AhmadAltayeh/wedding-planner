@@ -3,10 +3,6 @@ import path from "path";
 
 const UPLOAD_ROOT = path.join(process.cwd(), "uploads");
 
-export function getUploadRoot() {
-  return UPLOAD_ROOT;
-}
-
 export function absolutePathForStorage(storagePath: string) {
   const resolved = path.join(UPLOAD_ROOT, storagePath);
   if (!resolved.startsWith(UPLOAD_ROOT)) {
@@ -15,15 +11,16 @@ export function absolutePathForStorage(storagePath: string) {
   return resolved;
 }
 
-export async function saveVenueFile(
-  venueId: string,
+export async function saveMediaFile(
+  folder: string,
+  entityId: string,
   file: File
 ): Promise<{ storagePath: string; sizeBytes: number }> {
-  const dir = path.join(UPLOAD_ROOT, "venues", venueId);
+  const dir = path.join(UPLOAD_ROOT, folder, entityId);
   await mkdir(dir, { recursive: true });
 
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120);
-  const storagePath = path.join("venues", venueId, `${Date.now()}-${safeName}`);
+  const storagePath = path.join(folder, entityId, `${Date.now()}-${safeName}`);
   const abs = absolutePathForStorage(storagePath);
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -36,7 +33,13 @@ export async function saveVenueFile(
   return { storagePath, sizeBytes: buffer.length };
 }
 
+/** @deprecated use saveMediaFile */
+export async function saveVenueFile(venueId: string, file: File) {
+  return saveMediaFile("venues", venueId, file);
+}
+
 export async function deleteStoredFile(storagePath: string) {
+  if (!storagePath) return;
   try {
     await unlink(absolutePathForStorage(storagePath));
   } catch {

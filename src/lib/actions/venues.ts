@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { deleteStoredFile, saveVenueFile } from "@/lib/uploads";
+import { storeMediaFile, removeMediaFile } from "@/lib/media-storage";
 import { isAuthenticated } from "@/lib/auth";
 
 export type VenueInput = {
@@ -56,6 +56,7 @@ export async function getVenue(id: string) {
 export async function createVenue(data: VenueInput) {
   const venue = await prisma.venue.create({ data: cleanVenue(data) });
   revalidatePath("/venues");
+  revalidatePath("/venues/new");
   revalidatePath("/");
   revalidatePath("/compare");
   return venue;
@@ -68,6 +69,7 @@ export async function updateVenue(id: string, data: VenueInput) {
   });
   revalidatePath("/venues");
   revalidatePath(`/venues/${id}`);
+  revalidatePath("/venues/new");
   revalidatePath("/");
   revalidatePath("/compare");
   return venue;
@@ -77,7 +79,7 @@ export async function deleteVenue(id: string) {
   const media = await prisma.venueMedia.findMany({ where: { venueId: id } });
   await prisma.venue.delete({ where: { id } });
   for (const m of media) {
-    await deleteStoredFile(m.storagePath);
+    await removeMediaFile(m);
   }
   revalidatePath("/venues");
   revalidatePath("/");
@@ -168,13 +170,14 @@ export async function uploadVenueMedia(venueId: string, formData: FormData) {
     throw new Error("File type not allowed");
   }
 
-  const { storagePath, sizeBytes } = await saveVenueFile(venueId, file);
+  const { blobUrl, storagePath, sizeBytes } = await storeMediaFile("venues", venueId, file);
 
   await prisma.venueMedia.create({
     data: {
       venueId,
       kind,
       storagePath,
+      blobUrl,
       originalName: file.name,
       mimeType: file.type || "application/octet-stream",
       sizeBytes,
@@ -182,6 +185,14 @@ export async function uploadVenueMedia(venueId: string, formData: FormData) {
   });
 
   revalidatePath(`/venues/${venueId}`);
+  revalidatePath("/venues/new");
+}
+
+export async function listVenueMedia(venueId: string) {
+  return prisma.venueMedia.findMany({
+    where: { venueId },
+    orderBy: { createdAt: "desc" },
+  });
 }
 
 export async function deleteVenueMedia(mediaId: string, venueId: string) {
@@ -191,6 +202,6 @@ export async function deleteVenueMedia(mediaId: string, venueId: string) {
   const media = await prisma.venueMedia.findUnique({ where: { id: mediaId } });
   if (!media || media.venueId !== venueId) return;
   await prisma.venueMedia.delete({ where: { id: mediaId } });
-  await deleteStoredFile(media.storagePath);
+  await removeMediaFile(media);
   revalidatePath(`/venues/${venueId}`);
 }

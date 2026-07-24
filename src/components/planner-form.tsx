@@ -34,7 +34,15 @@ function toForm(p: Planner): Form {
   };
 }
 
-export function PlannerForm({ planner }: { planner?: Planner }) {
+export function PlannerForm({
+  planner,
+  onCreated,
+  submitLabel,
+}: {
+  planner?: Planner;
+  onCreated?: (planner: Planner) => void;
+  submitLabel?: string;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState<Form>(planner ? toForm(planner) : empty);
@@ -47,11 +55,19 @@ export function PlannerForm({ planner }: { planner?: Planner }) {
         if (!form.name.trim()) return;
         startTransition(async () => {
           if (planner) {
-            await updatePlanner(planner.id, form);
-            router.push("/planners");
+            const updated = await updatePlanner(planner.id, form);
+            if (onCreated) {
+              onCreated(updated);
+            } else {
+              router.push("/planners");
+            }
           } else {
-            await createPlanner(form);
-            router.push("/planners");
+            const created = await createPlanner(form);
+            if (onCreated) {
+              onCreated(created);
+            } else {
+              router.push("/planners");
+            }
           }
           router.refresh();
         });
@@ -146,7 +162,7 @@ export function PlannerForm({ planner }: { planner?: Planner }) {
         />
       </Field>
       <Button type="submit" className="w-full" disabled={pending}>
-        {planner ? "Save" : "Add planner"}
+        {pending ? "Saving…" : submitLabel ?? (planner ? "Save" : "Add planner")}
       </Button>
     </form>
   );

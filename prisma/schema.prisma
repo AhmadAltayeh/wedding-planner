@@ -58,7 +58,8 @@ model VenueMedia {
   venueId      String
   venue        Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
   kind         String
-  storagePath  String
+  storagePath  String   @default("")
+  blobUrl      String?
   originalName String
   mimeType     String
   sizeBytes    Int
@@ -101,6 +102,20 @@ model Planner {
   rating          Int?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  media           PlannerMedia[]
+}
+
+model PlannerMedia {
+  id           String   @id @default(cuid())
+  plannerId    String
+  planner      Planner  @relation(fields: [plannerId], references: [id], onDelete: Cascade)
+  kind         String   @default("photo")
+  storagePath  String   @default("")
+  blobUrl      String?
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
 }
 
 model Vendor {

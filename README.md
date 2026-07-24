@@ -38,7 +38,21 @@ When both are set, every page requires login. Share **only** `APP_PASSWORD` with
 
 ## Venue photos & menus
 
-Uploads are stored in the `uploads/` folder on disk — works when you run locally on your Mac. Vercel cannot persist local files; for cloud deploy you will need [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) or similar (can be added later).
+- **Local Mac:** files saved in `uploads/`
+- **Vercel:** uses [Vercel Blob](https://vercel.com/docs/storage/vercel-blob)
+
+### Enable uploads on Vercel
+
+1. Vercel project → **Storage** → **Create Database** → **Blob**
+2. Connect it to this project (adds `BLOB_READ_WRITE_TOKEN` automatically)
+3. **Redeploy**
+4. Update Turso schema (one time):
+
+```bash
+turso db shell wedding-planner < scripts/turso-add-media.sql
+```
+
+On a venue page, scroll to **Photo gallery & menu** (right under the title). Planners: **Edit planner** → **Planner photos**.
 
 ## Deploy on Vercel (free)
 

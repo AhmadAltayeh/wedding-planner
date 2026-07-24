@@ -9,7 +9,7 @@ import { VenueMediaSection } from "@/components/venue-media";
 import { LocationBlock, DjLightsPricing } from "@/components/venue-location";
 import { formatDate, formatJod } from "@/lib/utils";
 import { estimateVenueTotal } from "@/lib/venue-math";
-import { SERVICE_STYLES, statusColor, statusLabel } from "@/lib/constants";
+import { SERVICE_STYLES, statusLabel } from "@/lib/constants";
 import { Pencil } from "lucide-react";
 
 export default async function VenueDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,9 +20,6 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
   const guests = settings.guestEstimate;
   const est = estimateVenueTotal(venue, guests);
   const style = SERVICE_STYLES.find((s) => s.value === venue.serviceStyle)?.label;
-
-  const photos = venue.media.filter((m) => m.kind === "photo");
-  const hero = photos[0];
 
   return (
     <div>
@@ -39,32 +36,23 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
         }
       />
 
-      {hero && (
-        <div className="mb-4 overflow-hidden rounded-2xl border border-gold-soft/60">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/api/media/${hero.id}`}
-            alt=""
-            className="aspect-[16/10] w-full object-cover"
-          />
-        </div>
-      )}
+      <VenueMediaSection venueId={venue.id} media={venue.media} />
 
-      <Badge className={statusColor(venue.status)}>{statusLabel(venue.status)}</Badge>
+      <Badge className="mt-4">{statusLabel(venue.status)}</Badge>
       <div className="mt-2">
         <LocationBlock location={venue.location} />
       </div>
 
       <Card className="mt-4">
-        <p className="text-sm text-slate-600">Pricing</p>
+        <p className="text-sm text-ink-muted">Pricing</p>
         <p className="mt-1 text-lg font-semibold">
           {venue.pricePerPerson != null ? `${formatJod(venue.pricePerPerson)} / person` : "Per-person TBD"}
         </p>
         {venue.minGuests != null && (
-          <p className="text-sm text-slate-600">Minimum {venue.minGuests} guests</p>
+          <p className="text-sm text-ink-muted">Minimum {venue.minGuests} guests</p>
         )}
         {venue.hallRentalJod != null && (
-          <p className="text-sm text-slate-600">Hall rental {formatJod(venue.hallRentalJod)}</p>
+          <p className="text-sm text-ink-muted">Hall rental {formatJod(venue.hallRentalJod)}</p>
         )}
         <DjLightsPricing
           includesDj={venue.includesDj}
@@ -84,8 +72,6 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
         dates={venue.availableDates}
         weddingDate={settings.weddingDate}
       />
-
-      <VenueMediaSection venueId={venue.id} media={venue.media} />
 
       {(venue.contactPhone || venue.contactInstagram || venue.website) && (
         <Card className="mt-3 text-sm">
@@ -107,7 +93,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
 
       {venue.notes && (
         <Card className="mt-3">
-          <p className="text-sm text-slate-600">Notes</p>
+          <p className="text-sm text-ink-muted">Notes</p>
           <p className="mt-1 whitespace-pre-wrap text-sm">{venue.notes}</p>
         </Card>
       )}

@@ -4,6 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { absolutePathForStorage } from "@/lib/uploads";
 import { SESSION_COOKIE } from "@/lib/auth";
 
+type StoredMedia = {
+  blobUrl: string | null;
+  storagePath: string;
+  mimeType: string;
+  originalName: string;
+};
+
+async function resolveMedia(id: string): Promise<StoredMedia | null> {
+  const venue = await prisma.venueMedia.findUnique({ where: { id } });
+  if (venue) return venue;
+  const planner = await prisma.plannerMedia.findUnique({ where: { id } });
+  return planner;
+}
+
 export async function GET(
   _request: Request,
   context: { params: Promise<{ id: string }> }
@@ -19,9 +33,17 @@ export async function GET(
   }
 
   const { id } = await context.params;
-  const media = await prisma.venueMedia.findUnique({ where: { id } });
+  const media = await resolveMedia(id);
   if (!media) {
     return new NextResponse("Not found", { status: 404 });
+  }
+
+  if (media.blobUrl) {
+    return NextResponse.redirect(media.blobUrl);
+  }
+
+  if (!media.storagePath) {
+    return new NextResponse("File missing", { status: 404 });
   }
 
   try {

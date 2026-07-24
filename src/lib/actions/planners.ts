@@ -4,11 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function listPlanners() {
-  return prisma.planner.findMany({ orderBy: { updatedAt: "desc" } });
+  return prisma.planner.findMany({
+    include: { media: { where: { kind: "photo" }, take: 1 } },
+    orderBy: { updatedAt: "desc" },
+  });
 }
 
 export async function getPlanner(id: string) {
-  return prisma.planner.findUnique({ where: { id } });
+  return prisma.planner.findUnique({
+    where: { id },
+    include: { media: { orderBy: { createdAt: "desc" } } },
+  });
 }
 
 export async function createPlanner(data: {
@@ -29,6 +35,7 @@ export async function createPlanner(data: {
     data: { ...data, packagePriceJod: data.packagePriceJod ?? null, rating: data.rating ?? null },
   });
   revalidatePath("/planners");
+  revalidatePath("/planners/new");
   revalidatePath("/");
   return p;
 }
@@ -48,7 +55,12 @@ export async function updatePlanner(
 }
 
 export async function deletePlanner(id: string) {
+  const media = await prisma.plannerMedia.findMany({ where: { plannerId: id } });
   await prisma.planner.delete({ where: { id } });
+  const { removeMediaFile } = await import("@/lib/media-storage");
+  for (const m of media) {
+    await removeMediaFile(m);
+  }
   revalidatePath("/planners");
   revalidatePath("/");
 }

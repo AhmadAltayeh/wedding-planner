@@ -1,11 +1,11 @@
 import { PageHeader } from "@/components/ui";
-import { PlannerForm } from "@/components/planner-form";
+import { PlannerCreateFlow } from "@/components/planner-create-flow";
 
 export default function NewPlannerPage() {
   return (
     <div>
       <PageHeader title="Add planner" />
-      <PlannerForm />
+      <PlannerCreateFlow />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Push Prisma schema to a Turso database (tables only — does not copy local data).
+# Push Prisma schema to a Turso database (creates tables only if empty).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,6 +18,22 @@ if [[ -z "${1:-}" ]]; then
 fi
 
 DB_NAME="$1"
+
+export PATH="${PATH}:${HOME}/.turso"
+
+if ! command -v turso >/dev/null 2>&1; then
+  echo "Turso CLI not found. Install: curl -sSfL https://get.tur.so/install.sh | bash"
+  exit 1
+fi
+
+EXISTING=$(turso db shell "$DB_NAME" "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='WeddingSettings';" 2>/dev/null | tail -1 | tr -d '[:space:]' || echo "0")
+
+if [[ "$EXISTING" == "1" ]]; then
+  echo "Tables already exist on Turso (WeddingSettings found). Nothing to do."
+  echo "Add data on Vercel, or copy from your Mac: npm run db:sync:turso"
+  exit 0
+fi
+
 SQL_FILE="$(mktemp).sql"
 
 npx prisma migrate diff \
@@ -26,6 +42,10 @@ npx prisma migrate diff \
   --script > "$SQL_FILE"
 
 echo "Applying schema to Turso database: $DB_NAME"
-turso db shell "$DB_NAME" < "$SQL_FILE"
+if turso db shell "$DB_NAME" < "$SQL_FILE"; then
+  echo "Done."
+else
+  echo "If you see 'already exists', tables were created earlier — you can ignore and run: npm run db:sync:turso"
+  exit 1
+fi
 rm -f "$SQL_FILE"
-echo "Done."

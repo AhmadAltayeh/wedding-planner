@@ -83,7 +83,15 @@ function venueToInput(v: Venue): VenueInput {
   };
 }
 
-export function VenueForm({ venue }: { venue?: VenueWithRelations }) {
+export function VenueForm({
+  venue,
+  onCreated,
+  submitLabel,
+}: {
+  venue?: VenueWithRelations | Venue;
+  onCreated?: (venue: Venue) => void;
+  submitLabel?: string;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState<VenueInput>(venue ? venueToInput(venue) : empty);
@@ -94,11 +102,19 @@ export function VenueForm({ venue }: { venue?: VenueWithRelations }) {
     if (!form.name.trim()) return;
     startTransition(async () => {
       if (venue) {
-        await updateVenue(venue.id, form);
-        router.push(`/venues/${venue.id}`);
+        const updated = await updateVenue(venue.id, form);
+        if (onCreated) {
+          onCreated(updated);
+        } else {
+          router.push(`/venues/${venue.id}`);
+        }
       } else {
         const created = await createVenue(form);
-        router.push(`/venues/${created.id}`);
+        if (onCreated) {
+          onCreated(created);
+        } else {
+          router.push(`/venues/${created.id}`);
+        }
       }
       router.refresh();
     });
@@ -291,7 +307,7 @@ export function VenueForm({ venue }: { venue?: VenueWithRelations }) {
       </Field>
 
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Saving…" : venue ? "Save changes" : "Add venue"}
+        {pending ? "Saving…" : submitLabel ?? (venue ? "Save changes" : "Add venue")}
       </Button>
     </form>
   );

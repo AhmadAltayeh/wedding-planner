@@ -2,18 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import type { Planner, PlannerMedia } from "@prisma/client";
 import { deletePlanner } from "@/lib/actions/planners";
-import type { Planner } from "@prisma/client";
 import { PageHeader, Button } from "@/components/ui";
 import { PlannerForm } from "@/components/planner-form";
+import { PlannerMediaSection } from "@/components/planner-media";
 
-export function PlannerEditClient({ planner }: { planner: Planner }) {
+type PlannerWithMedia = Planner & { media: PlannerMedia[] };
+
+export function PlannerEditClient({ planner }: { planner: PlannerWithMedia }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   return (
     <div>
       <PageHeader title="Edit planner" subtitle={planner.name} />
+      <PlannerMediaSection plannerId={planner.id} media={planner.media} />
       <PlannerForm planner={planner} />
       <Button
         variant="danger"
