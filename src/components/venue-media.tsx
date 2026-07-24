@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { VenueMedia } from "@prisma/client";
 import { uploadVenueMedia, deleteVenueMedia, listVenueMedia } from "@/lib/actions/venues";
 import { Card } from "@/components/ui";
@@ -12,12 +12,16 @@ export function VenueMediaSection({
   venueId,
   media: mediaProp,
   locked = false,
+  onNeedsSave,
 }: {
   venueId?: string;
   media: VenueMedia[];
   locked?: boolean;
+  onNeedsSave?: () => void;
 }) {
   const router = useRouter();
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const menuInputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [activePhoto, setActivePhoto] = useState(0);
@@ -34,7 +38,15 @@ export function VenueMediaSection({
 
   const photos = media.filter((m) => m.kind === "photo");
   const menus = media.filter((m) => m.kind === "menu");
-  const disabled = locked || !venueId || pending;
+
+  function requireVenue(): boolean {
+    if (locked || !venueId) {
+      setError("Save the venue first (name required), then you can upload here.");
+      onNeedsSave?.();
+      return false;
+    }
+    return true;
+  }
 
   async function refreshMedia() {
     if (!venueId) return;
@@ -59,6 +71,9 @@ export function VenueMediaSection({
     });
   }
 
+  const pickClass =
+    "flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gold/60 bg-blush/25 text-sm font-semibold text-sage-dark cursor-pointer active:bg-blush/40 disabled:cursor-wait disabled:opacity-70";
+
   return (
     <Card className="mt-4" id="gallery">
       <div className="mb-4 flex items-center gap-2">
@@ -69,11 +84,10 @@ export function VenueMediaSection({
       {locked && (
         <p className="mb-4 flex items-start gap-2 rounded-xl bg-blush/40 px-3 py-2.5 text-sm text-ink-muted">
           <Lock className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-          Save the venue below (name required), then add photos and menu here on the same page.
+          Fill in the venue details and tap <strong>Save venue</strong> first — then photos and menu uploads work here.
         </p>
       )}
 
-      {/* Gallery */}
       <section className="mb-6">
         <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Venue photos</h3>
         {photos.length > 0 ? (
@@ -125,27 +139,34 @@ export function VenueMediaSection({
             No photos yet — add pictures from your venue visit.
           </p>
         )}
-        <label className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gold/60 bg-blush/25 text-sm font-semibold text-sage-dark ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
+        <button
+          type="button"
+          disabled={pending}
+          className={pickClass}
+          onClick={() => {
+            if (!requireVenue()) return;
+            photoInputRef.current?.click();
+          }}
+        >
           <ImagePlus className="h-5 w-5" />
           {pending ? "Uploading…" : "Add photos (camera or gallery)"}
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            multiple
-            className="hidden"
-            disabled={disabled}
-            onChange={(e) => {
-              const files = e.target.files;
-              if (!files?.length) return;
-              Array.from(files).forEach((f) => upload("photo", f));
-              e.target.value = "";
-            }}
-          />
-        </label>
+        </button>
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="sr-only"
+          tabIndex={-1}
+          onChange={(e) => {
+            const files = e.target.files;
+            if (!files?.length) return;
+            Array.from(files).forEach((f) => upload("photo", f));
+            e.target.value = "";
+          }}
+        />
       </section>
 
-      {/* Menu */}
       <section className="border-t border-gold-soft/50 pt-5">
         <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Catering menu</h3>
         {menus.length > 0 ? (
@@ -188,20 +209,29 @@ export function VenueMediaSection({
         ) : (
           <p className="mb-3 text-sm text-ink-muted">Upload the PDF or a photo of the menu they sent you.</p>
         )}
-        <label className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gold/60 bg-blush/25 text-sm font-semibold text-sage-dark ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
+        <button
+          type="button"
+          disabled={pending}
+          className={pickClass}
+          onClick={() => {
+            if (!requireVenue()) return;
+            menuInputRef.current?.click();
+          }}
+        >
           <FileText className="h-5 w-5" />
           {pending ? "Uploading…" : "Upload menu (PDF or photo)"}
-          <input
-            type="file"
-            accept="application/pdf,image/*,.pdf"
-            className="hidden"
-            disabled={disabled}
-            onChange={(e) => {
-              upload("menu", e.target.files?.[0] ?? null);
-              e.target.value = "";
-            }}
-          />
-        </label>
+        </button>
+        <input
+          ref={menuInputRef}
+          type="file"
+          accept="application/pdf,image/*,.pdf"
+          className="sr-only"
+          tabIndex={-1}
+          onChange={(e) => {
+            upload("menu", e.target.files?.[0] ?? null);
+            e.target.value = "";
+          }}
+        />
       </section>
 
       {error && <p className="mt-4 text-sm font-medium text-sage-dark">{error}</p>}

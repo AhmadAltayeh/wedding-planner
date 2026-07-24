@@ -12,11 +12,19 @@ export function VenueCreateFlow() {
 
   return (
     <>
-      <VenueMediaSection venueId={venue?.id} media={[]} locked={!venue} />
       <VenueForm
         venue={venue ?? undefined}
         onCreated={(v) => setVenue(v)}
-        submitLabel={venue ? "Save changes" : "Save venue & unlock uploads"}
+        submitLabel={venue ? "Save changes" : "Save venue"}
+        submitAnchorId="venue-save"
+      />
+      <VenueMediaSection
+        venueId={venue?.id}
+        media={[]}
+        locked={!venue}
+        onNeedsSave={() => {
+          document.getElementById("venue-save")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }}
       />
       {venue && (
         <Link href={`/venues/${venue.id}`} className="mt-4 block">

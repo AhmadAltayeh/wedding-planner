@@ -38,10 +38,12 @@ export function PlannerForm({
   planner,
   onCreated,
   submitLabel,
+  submitAnchorId,
 }: {
   planner?: Planner;
   onCreated?: (planner: Planner) => void;
   submitLabel?: string;
+  submitAnchorId?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -161,7 +163,7 @@ export function PlannerForm({
           onChange={(e) => setForm({ ...form, notes: e.target.value })}
         />
       </Field>
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" id={submitAnchorId} className="w-full" disabled={pending}>
         {pending ? "Saving…" : submitLabel ?? (planner ? "Save" : "Add planner")}
       </Button>
     </form>

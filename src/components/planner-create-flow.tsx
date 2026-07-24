@@ -12,11 +12,19 @@ export function PlannerCreateFlow() {
 
   return (
     <>
-      <PlannerMediaSection plannerId={planner?.id} media={[]} locked={!planner} />
       <PlannerForm
         planner={planner ?? undefined}
         onCreated={(p) => setPlanner(p)}
-        submitLabel={planner ? "Save changes" : "Save planner & unlock uploads"}
+        submitLabel={planner ? "Save changes" : "Save planner"}
+        submitAnchorId="planner-save"
+      />
+      <PlannerMediaSection
+        plannerId={planner?.id}
+        media={[]}
+        locked={!planner}
+        onNeedsSave={() => {
+          document.getElementById("planner-save")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }}
       />
       {planner && (
         <Link href="/planners" className="mt-4 block">

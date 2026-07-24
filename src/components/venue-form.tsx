@@ -87,10 +87,12 @@ export function VenueForm({
   venue,
   onCreated,
   submitLabel,
+  submitAnchorId,
 }: {
   venue?: VenueWithRelations | Venue;
   onCreated?: (venue: Venue) => void;
   submitLabel?: string;
+  submitAnchorId?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -306,7 +308,7 @@ export function VenueForm({
         />
       </Field>
 
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" id={submitAnchorId} className="w-full" disabled={pending}>
         {pending ? "Saving…" : submitLabel ?? (venue ? "Save changes" : "Add venue")}
       </Button>
     </form>
