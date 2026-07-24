@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -27,10 +28,23 @@ const links = [
 
 export function BottomNav() {
   const pathname = usePathname();
-  if (pathname === "/login") return null;
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
+  useEffect(() => {
+    const open = () => setGalleryOpen(true);
+    const close = () => setGalleryOpen(false);
+    window.addEventListener("wedding-gallery-open", open);
+    window.addEventListener("wedding-gallery-close", close);
+    return () => {
+      window.removeEventListener("wedding-gallery-open", open);
+      window.removeEventListener("wedding-gallery-close", close);
+    };
+  }, []);
+
+  if (pathname === "/login" || galleryOpen) return null;
 
   return (
-    <nav className="pointer-events-none fixed bottom-0 left-0 right-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1">
       <div
         className={cn(
           "pointer-events-auto flex w-full max-w-lg overflow-x-auto rounded-2xl border border-gold-soft/70",

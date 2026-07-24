@@ -119,8 +119,10 @@ function PhotoLightbox({
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
+    window.dispatchEvent(new Event("wedding-gallery-open"));
     return () => {
       document.body.style.overflow = "";
+      window.dispatchEvent(new Event("wedding-gallery-close"));
     };
   }, []);
 
@@ -147,7 +149,7 @@ function PhotoLightbox({
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black/95" role="dialog" aria-modal>
+    <div className="fixed inset-0 z-[200] flex flex-col bg-black/95" role="dialog" aria-modal>
       <div className="flex items-center justify-between gap-2 px-4 py-3 text-ivory">
         <span className="text-sm font-medium">
           {index + 1} / {photos.length}

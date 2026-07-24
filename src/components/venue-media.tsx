@@ -6,6 +6,7 @@ import { deleteVenueMedia, listVenueMedia } from "@/lib/actions/venues";
 import { Card } from "@/components/ui";
 import { CollapsibleSection } from "@/components/collapsible-section";
 import { PhotoGallery } from "@/components/photo-gallery";
+import { venueGalleryPhotos } from "@/lib/venue-photos";
 import { mediaSrc, isImageMime } from "@/lib/media-url";
 import { Trash2, ImagePlus, FileText, Camera, Lock } from "lucide-react";
 
@@ -37,8 +38,9 @@ export function VenueMediaSection({
     listVenueMedia(venueId).then(setMedia).catch(() => {});
   }, [venueId, locked]);
 
-  const photos = media.filter((m) => m.kind === "photo");
+  const photos = venueGalleryPhotos(media);
   const menus = media.filter((m) => m.kind === "menu");
+  const showUpload = variant !== "detail";
 
   function requireVenue(): boolean {
     if (locked || !venueId) {
@@ -99,12 +101,14 @@ export function VenueMediaSection({
 
   const photosSection = (
     <section>
-      <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Venue photos</h3>
+      {variant !== "detail" && (
+        <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Venue photos</h3>
+      )}
         {photos.length > 0 ? (
           <PhotoGallery
             photos={photos}
             onDelete={
-              venueId
+              venueId && showUpload
                 ? (mediaId) =>
                     startTransition(async () => {
                       await deleteVenueMedia(mediaId, venueId);
@@ -115,35 +119,41 @@ export function VenueMediaSection({
           />
         ) : (
           <p className="mb-3 rounded-xl bg-blush/30 px-3 py-6 text-center text-sm text-ink-muted">
-            No photos yet — add pictures from your venue visit.
+            {variant === "detail"
+              ? "No photos yet — tap Edit to add pictures from your venue visit."
+              : "No photos yet — add pictures from your venue visit."}
           </p>
         )}
-        <button
-          type="button"
-          disabled={pending}
-          className={pickClass}
-          onClick={() => {
-            if (!requireVenue()) return;
-            photoInputRef.current?.click();
-          }}
-        >
-          <ImagePlus className="h-5 w-5" />
-          {pending ? "Uploading…" : "Add photos (camera or gallery)"}
-        </button>
-        <input
-          ref={photoInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="sr-only"
-          tabIndex={-1}
-          onChange={(e) => {
-            const files = e.target.files;
-            if (!files?.length) return;
-            Array.from(files).forEach((f) => upload("photo", f));
-            e.target.value = "";
-          }}
-        />
+        {showUpload && (
+          <>
+            <button
+              type="button"
+              disabled={pending}
+              className={pickClass}
+              onClick={() => {
+                if (!requireVenue()) return;
+                photoInputRef.current?.click();
+              }}
+            >
+              <ImagePlus className="h-5 w-5" />
+              {pending ? "Uploading…" : "Add photos (camera or gallery)"}
+            </button>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="sr-only"
+              tabIndex={-1}
+              onChange={(e) => {
+                const files = e.target.files;
+                if (!files?.length) return;
+                Array.from(files).forEach((f) => upload("photo", f));
+                e.target.value = "";
+              }}
+            />
+          </>
+        )}
     </section>
   );
 
