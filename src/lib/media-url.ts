@@ -1,5 +1,6 @@
-export function mediaSrc(media: { id: string; blobUrl: string | null }): string {
-  return media.blobUrl ?? `/api/media/${media.id}`;
+/** Always serve through the app so private Vercel Blob + login cookie work. */
+export function mediaSrc(media: { id: string; blobUrl?: string | null }): string {
+  return `/api/media/${media.id}`;
 }
 
 export function isImageMime(mimeType: string): boolean {

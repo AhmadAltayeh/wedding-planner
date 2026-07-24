@@ -1,4 +1,5 @@
 import { readFile } from "fs/promises";
+import { head } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { absolutePathForStorage } from "@/lib/uploads";
@@ -38,8 +39,32 @@ export async function GET(
     return new NextResponse("Not found", { status: 404 });
   }
 
+  const headers = {
+    "Content-Type": media.mimeType,
+    "Content-Disposition": `inline; filename="${encodeURIComponent(media.originalName)}"`,
+    "Cache-Control": "private, max-age=3600",
+  };
+
   if (media.blobUrl) {
-    return NextResponse.redirect(media.blobUrl);
+    const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+    if (!token) {
+      return new NextResponse("Blob not configured", { status: 503 });
+    }
+    try {
+      const meta = await head(media.blobUrl, { token });
+      const blobRes = await fetch(meta.downloadUrl);
+      if (!blobRes.ok) {
+        return new NextResponse("File missing", { status: 404 });
+      }
+      return new NextResponse(blobRes.body, {
+        headers: {
+          ...headers,
+          "Content-Type": meta.contentType || media.mimeType,
+        },
+      });
+    } catch {
+      return new NextResponse("File missing", { status: 404 });
+    }
   }
 
   if (!media.storagePath) {
@@ -48,13 +73,7 @@ export async function GET(
 
   try {
     const data = await readFile(absolutePathForStorage(media.storagePath));
-    return new NextResponse(data, {
-      headers: {
-        "Content-Type": media.mimeType,
-        "Content-Disposition": `inline; filename="${encodeURIComponent(media.originalName)}"`,
-        "Cache-Control": "private, max-age=3600",
-      },
-    });
+    return new NextResponse(data, { headers });
   } catch {
     return new NextResponse("File missing", { status: 404 });
   }

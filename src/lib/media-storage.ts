@@ -19,6 +19,9 @@ export function formatUploadError(err: unknown): string {
   if (/no such table.*VenueMedia|PlannerMedia/i.test(msg)) {
     return "Database is missing media tables. Run scripts/turso-add-media.sql on Turso, then redeploy.";
   }
+  if (/public access on a private store/i.test(msg)) {
+    return "Blob store is private — redeploy the latest app (uploads now use private access).";
+  }
   if (/EROFS|read-only file system/i.test(msg)) {
     return "File storage is not configured on Vercel. Connect a Blob store to this project.";
   }
@@ -41,10 +44,10 @@ export async function storeMediaFile(
     const pathname = `${folder}/${entityId}/${Date.now()}-${safeName}`;
     const body = Buffer.from(await file.arrayBuffer());
     const blob = await put(pathname, body, {
-      access: "public",
+      access: "private",
       token,
       contentType: file.type || "application/octet-stream",
-    });
+    } as unknown as { access: "public"; token?: string; contentType?: string });
     return { blobUrl: blob.url, storagePath: "", sizeBytes: body.length };
   }
 
