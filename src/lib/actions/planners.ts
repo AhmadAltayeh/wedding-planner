@@ -21,6 +21,7 @@ export async function createPlanner(data: {
   name: string;
   company?: string;
   contactPhone?: string;
+  contactName?: string;
   contactInstagram?: string;
   serviceLevel?: string;
   packagePriceJod?: number | null;

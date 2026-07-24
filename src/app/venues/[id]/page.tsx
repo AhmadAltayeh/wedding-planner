@@ -8,7 +8,7 @@ import { VenueExtras } from "@/components/venue-extras";
 import { VenueMediaSection } from "@/components/venue-media";
 import { LocationBlock, DjLightsPricing } from "@/components/venue-location";
 import { formatDate, formatJod } from "@/lib/utils";
-import { estimateVenueTotal } from "@/lib/venue-math";
+import { venueEstimateBreakdown } from "@/lib/venue-math";
 import { SERVICE_STYLES, statusLabel } from "@/lib/constants";
 import { Pencil } from "lucide-react";
 
@@ -18,7 +18,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
   if (!venue) notFound();
 
   const guests = settings.guestEstimate;
-  const est = estimateVenueTotal(venue, guests);
+  const estimate = venueEstimateBreakdown(venue, guests);
   const style = SERVICE_STYLES.find((s) => s.value === venue.serviceStyle)?.label;
 
   return (
@@ -60,10 +60,24 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
           djPriceJod={venue.djPriceJod}
           lightsPriceJod={venue.lightsPriceJod}
         />
-        {est != null && (
-          <p className="mt-2 font-semibold text-sage-dark">
-            Estimated {formatJod(est)} for {guests} guests
-          </p>
+        {estimate.totalJod != null && (
+          <div className="mt-3 border-t border-gold-soft/40 pt-3">
+            <p className="font-semibold text-sage-dark">
+              Estimated {formatJod(estimate.totalJod)} for {estimate.guests} guests
+            </p>
+            <ul className="mt-2 space-y-0.5 text-sm text-ink-muted">
+              {venue.pricePerPerson != null && (
+                <li>
+                  Catering {formatJod(venue.pricePerPerson)} × {estimate.guests} ={" "}
+                  {formatJod(estimate.cateringJod)}
+                </li>
+              )}
+              {estimate.hallJod > 0 && <li>Hall {formatJod(estimate.hallJod)}</li>}
+              {estimate.djJod > 0 && <li>DJ {formatJod(estimate.djJod)}</li>}
+              {estimate.lightsJod > 0 && <li>Lights {formatJod(estimate.lightsJod)}</li>}
+              {estimate.addonsJod > 0 && <li>Add-ons {formatJod(estimate.addonsJod)}</li>}
+            </ul>
+          </div>
         )}
       </Card>
 
@@ -73,14 +87,20 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
         weddingDate={settings.weddingDate}
       />
 
-      {(venue.contactPhone || venue.contactInstagram || venue.website) && (
+      {(venue.contactPhone || venue.contactName || venue.contactInstagram || venue.website) && (
         <Card className="mt-3 text-sm">
           {venue.contactPhone && (
             <p>
+              {venue.contactName && (
+                <span className="font-medium text-ink">{venue.contactName} · </span>
+              )}
               <a href={`tel:${venue.contactPhone}`} className="font-medium text-sage">
                 {venue.contactPhone}
               </a>
             </p>
+          )}
+          {!venue.contactPhone && venue.contactName && (
+            <p className="font-medium text-ink">{venue.contactName}</p>
           )}
           {venue.contactInstagram && <p>{venue.contactInstagram}</p>}
           {venue.website && (

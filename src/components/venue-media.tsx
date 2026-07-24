@@ -1,9 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { VenueMedia } from "@prisma/client";
-import { uploadVenueMedia, deleteVenueMedia, listVenueMedia } from "@/lib/actions/venues";
+import { deleteVenueMedia, listVenueMedia } from "@/lib/actions/venues";
 import { Card } from "@/components/ui";
 import { mediaSrc, isImageMime } from "@/lib/media-url";
 import { Trash2, ImagePlus, FileText, Camera, Lock } from "lucide-react";
@@ -19,7 +18,6 @@ export function VenueMediaSection({
   locked?: boolean;
   onNeedsSave?: () => void;
 }) {
-  const router = useRouter();
   const photoInputRef = useRef<HTMLInputElement>(null);
   const menuInputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
@@ -52,19 +50,31 @@ export function VenueMediaSection({
     if (!venueId) return;
     const next = await listVenueMedia(venueId);
     setMedia(next);
-    router.refresh();
   }
 
-  function upload(kind: "photo" | "menu", file: File | null) {
-    if (!file || !venueId) return;
+  async function uploadViaApi(kind: "photo" | "menu", file: File) {
+    if (!venueId) return;
     setError(null);
     const fd = new FormData();
     fd.set("kind", kind);
     fd.set("file", file);
+    const res = await fetch(`/api/venues/${venueId}/media`, {
+      method: "POST",
+      body: fd,
+      credentials: "same-origin",
+    });
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    if (!res.ok) {
+      throw new Error(data.error || `Upload failed (${res.status})`);
+    }
+    await refreshMedia();
+  }
+
+  function upload(kind: "photo" | "menu", file: File | null) {
+    if (!file || !venueId) return;
     startTransition(async () => {
       try {
-        await uploadVenueMedia(venueId, fd);
-        await refreshMedia();
+        await uploadViaApi(kind, file);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Upload failed");
       }

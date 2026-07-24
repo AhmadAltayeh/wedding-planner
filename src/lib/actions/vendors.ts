@@ -18,6 +18,7 @@ export async function createVendor(data: {
   name: string;
   category: string;
   contactPhone?: string;
+  contactName?: string;
   contactInstagram?: string;
   priceJod?: number | null;
   priceType?: string;

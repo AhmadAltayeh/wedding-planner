@@ -25,6 +25,7 @@ model Venue {
   location        String?
   venueType       String   @default("hotel")
   contactPhone    String?
+  contactName     String?
   contactInstagram String?
   website         String?
   pricePerPerson  Float?
@@ -91,6 +92,7 @@ model Planner {
   name            String
   company         String?
   contactPhone    String?
+  contactName     String?
   contactInstagram String?
   serviceLevel    String   @default("full")
   packagePriceJod Float?
@@ -123,6 +125,7 @@ model Vendor {
   name            String
   category        String
   contactPhone    String?
+  contactName     String?
   contactInstagram String?
   priceJod        Float?
   priceType       String   @default("fixed")

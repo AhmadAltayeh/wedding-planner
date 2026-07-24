@@ -22,6 +22,7 @@ function toForm(p: Planner): Form {
     name: p.name,
     company: p.company ?? undefined,
     contactPhone: p.contactPhone ?? undefined,
+    contactName: p.contactName ?? undefined,
     contactInstagram: p.contactInstagram ?? undefined,
     serviceLevel: p.serviceLevel,
     packagePriceJod: p.packagePriceJod,
@@ -135,6 +136,13 @@ export function PlannerForm({
         />
         Manages vendors
       </label>
+      <Field label="Contact name">
+        <Input
+          value={form.contactName ?? ""}
+          onChange={(e) => setForm({ ...form, contactName: e.target.value })}
+          placeholder="Who you spoke with"
+        />
+      </Field>
       <Field label="Phone">
         <Input
           type="tel"

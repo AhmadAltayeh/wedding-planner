@@ -1,7 +1,11 @@
--- Run once on Turso if you already created tables before this update:
+-- Run once on Turso if tables existed before media / contact updates:
 -- turso db shell wedding-planner < scripts/turso-add-media.sql
+-- (Ignore errors for columns/tables that already exist.)
 
 ALTER TABLE VenueMedia ADD COLUMN blobUrl TEXT;
+ALTER TABLE Venue ADD COLUMN contactName TEXT;
+ALTER TABLE Planner ADD COLUMN contactName TEXT;
+ALTER TABLE Vendor ADD COLUMN contactName TEXT;
 
 CREATE TABLE IF NOT EXISTS PlannerMedia (
     id TEXT NOT NULL PRIMARY KEY,

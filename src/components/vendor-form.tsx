@@ -21,6 +21,7 @@ function toForm(v: Vendor): Form {
     name: v.name,
     category: v.category,
     contactPhone: v.contactPhone ?? undefined,
+    contactName: v.contactName ?? undefined,
     contactInstagram: v.contactInstagram ?? undefined,
     priceJod: v.priceJod,
     priceType: v.priceType,
@@ -89,6 +90,13 @@ export function VendorForm({ vendor }: { vendor?: Vendor }) {
           </Select>
         </Field>
       </div>
+      <Field label="Contact name">
+        <Input
+          value={form.contactName ?? ""}
+          onChange={(e) => setForm({ ...form, contactName: e.target.value })}
+          placeholder="Person at this vendor"
+        />
+      </Field>
       <Field label="Phone">
         <Input
           type="tel"

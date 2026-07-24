@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { PlannerMedia } from "@prisma/client";
 import {
-  uploadPlannerMedia,
   deletePlannerMedia,
   listPlannerMedia,
 } from "@/lib/actions/planner-media";
@@ -23,7 +21,6 @@ export function PlannerMediaSection({
   locked?: boolean;
   onNeedsSave?: () => void;
 }) {
-  const router = useRouter();
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +48,29 @@ export function PlannerMediaSection({
     if (!plannerId) return;
     const next = await listPlannerMedia(plannerId);
     setMedia(next);
-    router.refresh();
+  }
+
+  function uploadFile(file: File) {
+    if (!plannerId) return;
+    setError(null);
+    startTransition(async () => {
+      try {
+        const fd = new FormData();
+        fd.set("file", file);
+        const res = await fetch(`/api/planners/${plannerId}/media`, {
+          method: "POST",
+          body: fd,
+          credentials: "same-origin",
+        });
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        if (!res.ok) {
+          throw new Error(data.error || `Upload failed (${res.status})`);
+        }
+        await refreshMedia();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Upload failed");
+      }
+    });
   }
 
   const pickClass =
@@ -117,17 +136,7 @@ export function PlannerMediaSection({
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (!file || !plannerId) return;
-          setError(null);
-          const fd = new FormData();
-          fd.set("file", file);
-          startTransition(async () => {
-            try {
-              await uploadPlannerMedia(plannerId, fd);
-              await refreshMedia();
-            } catch (err) {
-              setError(err instanceof Error ? err.message : "Upload failed");
-            }
-          });
+          uploadFile(file);
           e.target.value = "";
         }}
       />

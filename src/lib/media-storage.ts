@@ -7,12 +7,30 @@ export type StoredMedia = {
   sizeBytes: number;
 };
 
+function isVercelRuntime(): boolean {
+  return Boolean(process.env.VERCEL);
+}
+
+export function formatUploadError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (/no such column.*blobUrl/i.test(msg) || /Unknown column.*blobUrl/i.test(msg)) {
+    return "Database is missing photo columns. Run scripts/turso-add-media.sql on Turso, then redeploy.";
+  }
+  if (/no such table.*VenueMedia|PlannerMedia/i.test(msg)) {
+    return "Database is missing media tables. Run scripts/turso-add-media.sql on Turso, then redeploy.";
+  }
+  if (/EROFS|read-only file system/i.test(msg)) {
+    return "File storage is not configured on Vercel. Connect a Blob store to this project.";
+  }
+  return msg || "Upload failed";
+}
+
 export async function storeMediaFile(
   folder: "venues" | "planners",
   entityId: string,
   file: File
 ): Promise<StoredMedia> {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
   const maxBytes = 20 * 1024 * 1024;
   if (file.size > maxBytes) {
     throw new Error("File too large (max 20MB)");
@@ -21,8 +39,19 @@ export async function storeMediaFile(
   if (token) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120);
     const pathname = `${folder}/${entityId}/${Date.now()}-${safeName}`;
-    const blob = await put(pathname, file, { access: "public", token });
-    return { blobUrl: blob.url, storagePath: "", sizeBytes: file.size };
+    const body = Buffer.from(await file.arrayBuffer());
+    const blob = await put(pathname, body, {
+      access: "public",
+      token,
+      contentType: file.type || "application/octet-stream",
+    });
+    return { blobUrl: blob.url, storagePath: "", sizeBytes: body.length };
+  }
+
+  if (isVercelRuntime()) {
+    throw new Error(
+      "Blob storage is not configured. In Vercel: Storage → Blob → connect to this project, then redeploy."
+    );
   }
 
   const { storagePath, sizeBytes } = await saveMediaFile(folder, entityId, file);
@@ -33,7 +62,7 @@ export async function removeMediaFile(media: {
   blobUrl: string | null;
   storagePath: string;
 }) {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
   if (media.blobUrl && token) {
     await del(media.blobUrl, { token });
   }

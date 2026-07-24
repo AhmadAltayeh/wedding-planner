@@ -7,7 +7,7 @@ import { VenueForm } from "@/components/venue-form";
 import { VenueMediaSection } from "@/components/venue-media";
 import { Button } from "@/components/ui";
 
-export function VenueCreateFlow() {
+export function VenueCreateFlow({ guestEstimate }: { guestEstimate: number }) {
   const [venue, setVenue] = useState<Venue | null>(null);
 
   return (
@@ -17,6 +17,7 @@ export function VenueCreateFlow() {
         onCreated={(v) => setVenue(v)}
         submitLabel={venue ? "Save changes" : "Save venue"}
         submitAnchorId="venue-save"
+        guestEstimate={guestEstimate}
       />
       <VenueMediaSection
         venueId={venue?.id}

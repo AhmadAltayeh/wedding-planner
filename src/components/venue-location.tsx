@@ -1,33 +1,45 @@
-import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { formatJod } from "@/lib/utils";
+import { googleMapsUrl, locationDisplayLabel } from "@/lib/maps-url";
 
 export function LocationLine({ location }: { location: string | null | undefined }) {
-  if (!location) return null;
-  const isUrl = /^https?:\/\//i.test(location.trim());
-  if (isUrl) {
-    return (
-      <a href={location.trim()} target="_blank" rel="noreferrer" className="text-sage underline-offset-2 hover:underline">
-        Open in Maps
-      </a>
-    );
-  }
-  return <span>{location}</span>;
+  if (!location?.trim()) return null;
+  const href = googleMapsUrl(location);
+  const label = locationDisplayLabel(location);
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 text-sage underline-offset-2 hover:underline"
+    >
+      <MapPin className="h-4 w-4 shrink-0" />
+      {label}
+    </a>
+  );
 }
 
 export function LocationBlock({ location }: { location: string | null | undefined }) {
-  if (!location) return null;
-  const isUrl = /^https?:\/\//i.test(location.trim());
+  if (!location?.trim()) return null;
+  const href = googleMapsUrl(location);
+  const label = locationDisplayLabel(location);
+
   return (
-    <p className="text-sm text-slate-700">
-      <span className="text-slate-500">Location · </span>
-      {isUrl ? (
-        <Link href={location.trim()} target="_blank" rel="noreferrer" className="font-medium text-sage">
-          {location.trim()}
-        </Link>
-      ) : (
-        location
-      )}
-    </p>
+    <div className="text-sm text-slate-700">
+      <p>
+        <span className="text-slate-500">Location · </span>
+        <span className="text-ink">{label}</span>
+      </p>
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-gold-soft/70 bg-blush/30 px-4 font-semibold text-sage-dark active:bg-blush/50"
+      >
+        <MapPin className="h-5 w-5 text-gold" />
+        Open in Google Maps
+      </a>
+    </div>
   );
 }
 

@@ -10,6 +10,7 @@ import {
   type VenueInput,
 } from "@/lib/actions/venues";
 import { Button, Field, Input, Select, Textarea } from "@/components/ui";
+import { VenueEstimatePreview } from "@/components/venue-estimate-preview";
 import {
   VENUE_TYPES,
   SERVICE_STYLES,
@@ -59,6 +60,7 @@ function venueToInput(v: Venue): VenueInput {
     location: v.location ?? undefined,
     venueType: v.venueType,
     contactPhone: v.contactPhone ?? undefined,
+    contactName: v.contactName ?? undefined,
     contactInstagram: v.contactInstagram ?? undefined,
     website: v.website ?? undefined,
     pricePerPerson: v.pricePerPerson,
@@ -88,11 +90,13 @@ export function VenueForm({
   onCreated,
   submitLabel,
   submitAnchorId,
+  guestEstimate = 150,
 }: {
   venue?: VenueWithRelations | Venue;
   onCreated?: (venue: Venue) => void;
   submitLabel?: string;
   submitAnchorId?: string;
+  guestEstimate?: number;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -143,7 +147,7 @@ export function VenueForm({
         <Input
           value={form.location ?? ""}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
-          placeholder="Neighborhood, address, or Google Maps link"
+          placeholder="e.g. Abdoun, Landmark Amman — opens in Google Maps"
         />
       </Field>
 
@@ -215,6 +219,20 @@ export function VenueForm({
         </Field>
       </div>
 
+      <VenueEstimatePreview
+        guestEstimate={guestEstimate}
+        venue={{
+          pricePerPerson: form.pricePerPerson ?? null,
+          minGuests: form.minGuests ?? null,
+          hallRentalJod: form.hallRentalJod ?? null,
+          djPriceJod: form.djPriceJod ?? null,
+          lightsPriceJod: form.lightsPriceJod ?? null,
+          includesDj: form.includesDj,
+          includesLights: form.includesLights,
+          addons: "addons" in (venue ?? {}) ? (venue as VenueWithRelations).addons : [],
+        }}
+      />
+
       <div className="grid grid-cols-2 gap-3">
         <Field label="Min guests">
           <Input
@@ -245,6 +263,13 @@ export function VenueForm({
         </div>
       </Field>
 
+      <Field label="Contact name">
+        <Input
+          value={form.contactName ?? ""}
+          onChange={(e) => setForm({ ...form, contactName: e.target.value })}
+          placeholder="e.g. Rana — events coordinator"
+        />
+      </Field>
       <Field label="Phone / WhatsApp">
         <Input
           type="tel"

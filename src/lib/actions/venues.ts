@@ -10,6 +10,7 @@ export type VenueInput = {
   location?: string;
   venueType?: string;
   contactPhone?: string;
+  contactName?: string;
   contactInstagram?: string;
   website?: string;
   pricePerPerson?: number | null;
