@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model WeddingSettings {
+  id              String   @id @default("default")
+  partnerOne      String?
+  partnerTwo      String?
+  weddingDate     DateTime?
+  guestEstimate   Int      @default(150)
+  totalBudgetJod  Float?
+  notes           String?
+  updatedAt       DateTime @updatedAt
+}
+
+model Venue {
+  id              String   @id @default(cuid())
+  name            String
+  location        String?
+  venueType       String   @default("hotel")
+  contactPhone    String?
+  contactInstagram String?
+  website         String?
+  pricePerPerson  Float?
+  minGuests       Int?
+  maxGuests       Int?
+  serviceStyle    String   @default("both")
+  includesFood    Boolean  @default(false)
+  includesDj      Boolean  @default(false)
+  includesLights  Boolean  @default(false)
+  includesTables  Boolean  @default(false)
+  includesChairs  Boolean  @default(false)
+  includesParking Boolean  @default(false)
+  includesZaffe   Boolean  @default(false)
+  includesDecor   Boolean  @default(false)
+  djPriceJod      Float?
+  lightsPriceJod  Float?
+  hallRentalJod   Float?
+  notes           String?
+  status          String   @default("considering")
+  rating          Int?
+  visitedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  availableDates  VenueDate[]
+  addons          VenueAddon[]
+  media           VenueMedia[]
+}
+
+model VenueMedia {
+  id           String   @id @default(cuid())
+  venueId      String
+  venue        Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  kind         String
+  storagePath  String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+}
+
+model VenueDate {
+  id        String   @id @default(cuid())
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  date      DateTime
+  note      String?
+}
+
+model VenueAddon {
+  id          String  @id @default(cuid())
+  venueId     String
+  venue       Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name        String
+  category    String  @default("other")
+  priceJod    Float?
+  priceType   String  @default("fixed")
+  included    Boolean @default(false)
+  notes       String?
+}
+
+model Planner {
+  id              String   @id @default(cuid())
+  name            String
+  company         String?
+  contactPhone    String?
+  contactInstagram String?
+  serviceLevel    String   @default("full")
+  packagePriceJod Float?
+  priceNotes      String?
+  includesVenue   Boolean  @default(false)
+  includesVendors Boolean  @default(false)
+  notes           String?
+  status          String   @default("considering")
+  rating          Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Vendor {
+  id              String   @id @default(cuid())
+  name            String
+  category        String
+  contactPhone    String?
+  contactInstagram String?
+  priceJod        Float?
+  priceType       String   @default("fixed")
+  notes           String?
+  status          String   @default("considering")
+  rating          Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model BudgetItem {
+  id          String   @id @default(cuid())
+  category    String
+  label       String
+  estimatedJod Float?
+  actualJod   Float?
+  paid        Boolean  @default(false)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  category    String    @default("general")
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  notes       String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
