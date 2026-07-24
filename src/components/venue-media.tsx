@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import type { VenueMedia } from "@prisma/client";
 import { deleteVenueMedia, listVenueMedia } from "@/lib/actions/venues";
 import { Card } from "@/components/ui";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { mediaSrc, isImageMime } from "@/lib/media-url";
 import { Trash2, ImagePlus, FileText, Camera, Lock } from "lucide-react";
 
@@ -12,11 +13,13 @@ export function VenueMediaSection({
   media: mediaProp,
   locked = false,
   onNeedsSave,
+  variant = "default",
 }: {
   venueId?: string;
   media: VenueMedia[];
   locked?: boolean;
   onNeedsSave?: () => void;
+  variant?: "default" | "detail";
 }) {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const menuInputRef = useRef<HTMLInputElement>(null);
@@ -84,22 +87,19 @@ export function VenueMediaSection({
   const pickClass =
     "flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gold/60 bg-blush/25 text-sm font-semibold text-sage-dark cursor-pointer active:bg-blush/40 disabled:cursor-wait disabled:opacity-70";
 
-  return (
-    <Card className="mt-4" id="gallery">
-      <div className="mb-4 flex items-center gap-2">
-        <Camera className="h-5 w-5 text-gold" />
-        <h2 className="font-serif text-lg font-semibold text-ink">Photo gallery & menu</h2>
-      </div>
+  const menuSummary =
+    menus.length === 0 ? "No menu files yet" : `${menus.length} file${menus.length === 1 ? "" : "s"}`;
 
-      {locked && (
-        <p className="mb-4 flex items-start gap-2 rounded-xl bg-blush/40 px-3 py-2.5 text-sm text-ink-muted">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-          Fill in the venue details and tap <strong>Save venue</strong> first — then photos and menu uploads work here.
-        </p>
-      )}
+  const lockedHint = locked && (
+    <p className="mb-4 flex items-start gap-2 rounded-xl bg-blush/40 px-3 py-2.5 text-sm text-ink-muted">
+      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+      Fill in the venue details and tap <strong>Save venue</strong> first — then photos and menu uploads work here.
+    </p>
+  );
 
-      <section className="mb-6">
-        <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Venue photos</h3>
+  const photosSection = (
+    <section>
+      <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Venue photos</h3>
         {photos.length > 0 ? (
           <>
             <div className="mb-3 overflow-hidden rounded-2xl border border-gold-soft/60 bg-blush/20">
@@ -175,10 +175,12 @@ export function VenueMediaSection({
             e.target.value = "";
           }}
         />
-      </section>
+    </section>
+  );
 
-      <section className="border-t border-gold-soft/50 pt-5">
-        <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Catering menu</h3>
+  const menuSection = (
+    <section>
+      <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Catering menu</h3>
         {menus.length > 0 ? (
           <ul className="mb-3 space-y-3">
             {menus.map((m) => {
@@ -242,9 +244,40 @@ export function VenueMediaSection({
             e.target.value = "";
           }}
         />
-      </section>
+    </section>
+  );
 
-      {error && <p className="mt-4 text-sm font-medium text-sage-dark">{error}</p>}
+  const errorBlock = error && <p className="mt-4 text-sm font-medium text-sage-dark">{error}</p>;
+
+  if (variant === "detail") {
+    return (
+      <div className="mt-4 space-y-4">
+        <CollapsibleSection title="Catering menus" summary={menuSummary}>
+          {lockedHint}
+          {menuSection}
+        </CollapsibleSection>
+        <Card id="gallery">
+          <div className="mb-4 flex items-center gap-2">
+            <Camera className="h-5 w-5 text-gold" />
+            <h2 className="font-serif text-lg font-semibold text-ink">Photo gallery</h2>
+          </div>
+          {photosSection}
+        </Card>
+        {errorBlock}
+      </div>
+    );
+  }
+
+  return (
+    <Card className="mt-4" id="gallery">
+      <div className="mb-4 flex items-center gap-2">
+        <Camera className="h-5 w-5 text-gold" />
+        <h2 className="font-serif text-lg font-semibold text-ink">Photo gallery & menu</h2>
+      </div>
+      {lockedHint}
+      <div className="mb-6">{photosSection}</div>
+      <div className="border-t border-gold-soft/50 pt-5">{menuSection}</div>
+      {errorBlock}
     </Card>
   );
 }

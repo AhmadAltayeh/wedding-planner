@@ -6,7 +6,7 @@ import { PageHeader, Card, Badge, Button } from "@/components/ui";
 import { VenueDatesSection } from "@/components/venue-dates-section";
 import { VenueExtras } from "@/components/venue-extras";
 import { VenueMediaSection } from "@/components/venue-media";
-import { LocationBlock, DjLightsPricing } from "@/components/venue-location";
+import { LocationBlock, ContactBlock, InstagramBlock, WebsiteBlock, DjLightsPricing } from "@/components/venue-location";
 import { formatDate, formatJod } from "@/lib/utils";
 import { venueEstimateBreakdown } from "@/lib/venue-math";
 import { SERVICE_STYLES, statusLabel } from "@/lib/constants";
@@ -25,7 +25,7 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
     <div>
       <PageHeader
         title={venue.name}
-        subtitle={[venue.location, style].filter(Boolean).join(" · ")}
+        subtitle={style ?? undefined}
         action={
           <Link href={`/venues/${id}/edit`}>
             <Button variant="secondary" className="gap-1 px-3">
@@ -36,12 +36,8 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
         }
       />
 
-      <VenueMediaSection venueId={venue.id} media={venue.media} />
-
       <Badge className="mt-4">{statusLabel(venue.status)}</Badge>
-      <div className="mt-2">
-        <LocationBlock location={venue.location} />
-      </div>
+      <LocationBlock location={venue.location} />
 
       <Card className="mt-4">
         <p className="text-sm text-ink-muted">Pricing</p>
@@ -95,29 +91,9 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
         weddingDate={settings.weddingDate}
       />
 
-      {(venue.contactPhone || venue.contactName || venue.contactInstagram || venue.website) && (
-        <Card className="mt-3 text-sm">
-          {venue.contactPhone && (
-            <p>
-              {venue.contactName && (
-                <span className="font-medium text-ink">{venue.contactName} · </span>
-              )}
-              <a href={`tel:${venue.contactPhone}`} className="font-medium text-sage">
-                {venue.contactPhone}
-              </a>
-            </p>
-          )}
-          {!venue.contactPhone && venue.contactName && (
-            <p className="font-medium text-ink">{venue.contactName}</p>
-          )}
-          {venue.contactInstagram && <p>{venue.contactInstagram}</p>}
-          {venue.website && (
-            <a href={venue.website} className="break-all text-sage" target="_blank" rel="noreferrer">
-              {venue.website}
-            </a>
-          )}
-        </Card>
-      )}
+      <ContactBlock contactName={venue.contactName} contactPhone={venue.contactPhone} />
+      <InstagramBlock instagram={venue.contactInstagram} />
+      <WebsiteBlock website={venue.website} />
 
       {venue.notes && (
         <Card className="mt-3">
@@ -130,7 +106,9 @@ export default async function VenueDetailPage({ params }: { params: Promise<{ id
         <p className="mt-3 text-sm text-ink-muted">Visited {formatDate(venue.visitedAt)}</p>
       )}
 
-      <VenueExtras venueId={venue.id} addons={venue.addons} />
+      <VenueExtras venueId={venue.id} addons={venue.addons} collapsible />
+
+      <VenueMediaSection venueId={venue.id} media={venue.media} variant="detail" />
     </div>
   );
 }

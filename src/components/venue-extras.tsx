@@ -8,6 +8,7 @@ import {
   deleteVenue,
 } from "@/lib/actions/venues";
 import { Button, Field, Input, Select } from "@/components/ui";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { ADDON_CATEGORIES } from "@/lib/constants";
 import { formatJod } from "@/lib/utils";
 import type { VenueAddon } from "@prisma/client";
@@ -16,9 +17,11 @@ import { Trash2 } from "lucide-react";
 export function VenueExtras({
   venueId,
   addons,
+  collapsible = false,
 }: {
   venueId: string;
   addons: VenueAddon[];
+  collapsible?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -28,10 +31,13 @@ export function VenueExtras({
   const [addonType, setAddonType] = useState("fixed");
   const [addonIncluded, setAddonIncluded] = useState(false);
 
-  return (
-    <div className="mt-8 space-y-8">
-      <section>
-        <h2 className="mb-3 font-serif text-lg font-semibold">Menu & add-ons pricing</h2>
+  const addonSummary =
+    addons.length === 0
+      ? "No line items yet"
+      : `${addons.length} item${addons.length === 1 ? "" : "s"}`;
+
+  const addonBody = (
+    <>
         <p className="mb-3 text-sm text-ink-muted">
           Track DJ, lights, extra menu tiers, chairs — included or priced separately.
         </p>
@@ -121,7 +127,21 @@ export function VenueExtras({
         >
           Add line item
         </Button>
-      </section>
+    </>
+  );
+
+  return (
+    <div className={collapsible ? "space-y-8" : "mt-8 space-y-8"}>
+      {collapsible ? (
+        <CollapsibleSection title="Menu & add-ons pricing" summary={addonSummary}>
+          {addonBody}
+        </CollapsibleSection>
+      ) : (
+        <section>
+          <h2 className="mb-3 font-serif text-lg font-semibold">Menu & add-ons pricing</h2>
+          {addonBody}
+        </section>
+      )}
 
       <Button
         variant="danger"
