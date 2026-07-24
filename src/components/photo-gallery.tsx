@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { VenueMedia } from "@prisma/client";
 import { mediaSrc } from "@/lib/media-url";
+import { lockAppMainScroll } from "@/lib/app-scroll";
 import { ChevronLeft, ChevronRight, X, Trash2 } from "lucide-react";
 
 type PhotoItem = Pick<VenueMedia, "id" | "blobUrl" | "originalName">;
@@ -118,10 +119,10 @@ function PhotoLightbox({
   }, [startIndex]);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    const unlock = lockAppMainScroll();
     window.dispatchEvent(new Event("wedding-gallery-open"));
     return () => {
-      document.body.style.overflow = "";
+      unlock();
       window.dispatchEvent(new Event("wedding-gallery-close"));
     };
   }, []);
@@ -149,7 +150,11 @@ function PhotoLightbox({
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[200] flex flex-col bg-black/95" role="dialog" aria-modal>
+    <div
+      className="fixed inset-0 z-[200] flex h-dvh max-h-dvh w-full flex-col bg-black"
+      role="dialog"
+      aria-modal
+    >
       <div className="flex items-center justify-between gap-2 px-4 py-3 text-ivory">
         <span className="text-sm font-medium">
           {index + 1} / {photos.length}
@@ -177,7 +182,7 @@ function PhotoLightbox({
         </div>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center">
+      <div className="relative flex min-h-0 flex-1 items-stretch">
         {photos.length > 1 && (
           <button
             type="button"
@@ -192,19 +197,19 @@ function PhotoLightbox({
 
         <div
           ref={scrollRef}
-          className="flex h-full w-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
+          className="flex h-full min-h-0 w-full snap-x snap-mandatory overflow-x-auto scrollbar-none"
           onScroll={onScroll}
         >
           {photos.map((p, i) => (
             <div
               key={p.id}
-              className="flex h-full min-w-full shrink-0 snap-center items-center justify-center px-2"
+              className="flex h-full min-h-0 min-w-full shrink-0 snap-center items-center justify-center px-2 py-2"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={mediaSrc(p)}
                 alt={p.originalName || `Photo ${i + 1}`}
-                className="max-h-[75vh] max-w-full object-contain"
+                className="max-h-full max-w-full object-contain"
               />
             </div>
           ))}

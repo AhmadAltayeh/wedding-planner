@@ -38,11 +38,16 @@ export const dynamic = "force-dynamic";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable} ${script.variable}`}>
-      <body className="app-backdrop min-h-dvh font-sans antialiased">
-        <main className="relative mx-auto min-h-dvh w-full max-w-lg px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[calc(5.75rem+env(safe-area-inset-bottom))]">
-          {children}
-        </main>
-        <BottomNav />
+      <body className="app-backdrop font-sans antialiased">
+        <div className="mx-auto flex h-dvh max-h-dvh w-full max-w-lg flex-col overflow-hidden">
+          <main
+            id="app-main-scroll"
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4"
+          >
+            {children}
+          </main>
+          <BottomNav />
+        </div>
       </body>
     </html>
   );

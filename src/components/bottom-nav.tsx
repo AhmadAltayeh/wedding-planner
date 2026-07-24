@@ -44,11 +44,11 @@ export function BottomNav() {
   if (pathname === "/login" || galleryOpen) return null;
 
   return (
-    <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1">
+    <nav className="shrink-0 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
       <div
         className={cn(
-          "pointer-events-auto flex w-full max-w-lg overflow-x-auto rounded-2xl border border-gold-soft/70",
-          "bg-surface/92 shadow-xl shadow-sage/15 backdrop-blur-xl scrollbar-none"
+          "flex w-full overflow-x-auto rounded-2xl border border-gold-soft/70",
+          "bg-surface shadow-xl shadow-sage/15 scrollbar-none"
         )}
       >
         {links.map(({ href, label, icon: Icon }) => {

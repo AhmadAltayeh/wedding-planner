@@ -40,7 +40,7 @@ export function VenueMediaSection({
 
   const photos = venueGalleryPhotos(media);
   const menus = media.filter((m) => m.kind === "menu");
-  const showUpload = variant !== "detail";
+  const showUpload = !locked;
 
   function requireVenue(): boolean {
     if (locked || !venueId) {
@@ -119,9 +119,7 @@ export function VenueMediaSection({
           />
         ) : (
           <p className="mb-3 rounded-xl bg-blush/30 px-3 py-6 text-center text-sm text-ink-muted">
-            {variant === "detail"
-              ? "No photos yet — tap Edit to add pictures from your venue visit."
-              : "No photos yet — add pictures from your venue visit."}
+            No photos yet — add pictures from your venue visit.
           </p>
         )}
         {showUpload && (
@@ -129,7 +127,7 @@ export function VenueMediaSection({
             <button
               type="button"
               disabled={pending}
-              className={pickClass}
+              className={`${pickClass} mt-3`}
               onClick={() => {
                 if (!requireVenue()) return;
                 photoInputRef.current?.click();
