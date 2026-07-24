@@ -205,10 +205,6 @@ export function VenueMediaSection({
       </section>
 
       {error && <p className="mt-4 text-sm font-medium text-sage-dark">{error}</p>}
-      <p className="mt-3 text-xs text-ink-muted">
-        On Vercel: Storage → create a <strong>Blob store</strong> (connects{" "}
-        <code className="rounded bg-blush px-1">BLOB_READ_WRITE_TOKEN</code> automatically), then redeploy.
-      </p>
     </Card>
   );
 }
