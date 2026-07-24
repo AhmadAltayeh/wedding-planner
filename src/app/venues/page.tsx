@@ -3,7 +3,7 @@ import { listVenues } from "@/lib/actions/venues";
 import { getSettings } from "@/lib/actions/settings";
 import { PageHeader, Card, Badge, EmptyState } from "@/components/ui";
 import { FabLink } from "@/components/fab-link";
-import { formatDate, formatDateWithShortDay, formatJod } from "@/lib/utils";
+import { formatDateWithShortDay, formatJod } from "@/lib/utils";
 import { estimateVenueTotal } from "@/lib/venue-math";
 import { SERVICE_STYLES, statusColor, statusLabel } from "@/lib/constants";
 
