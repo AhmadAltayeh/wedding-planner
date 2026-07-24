@@ -5,6 +5,7 @@ import type { VenueMedia } from "@prisma/client";
 import { deleteVenueMedia, listVenueMedia } from "@/lib/actions/venues";
 import { Card } from "@/components/ui";
 import { CollapsibleSection } from "@/components/collapsible-section";
+import { PhotoGallery } from "@/components/photo-gallery";
 import { mediaSrc, isImageMime } from "@/lib/media-url";
 import { Trash2, ImagePlus, FileText, Camera, Lock } from "lucide-react";
 
@@ -25,7 +26,6 @@ export function VenueMediaSection({
   const menuInputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [activePhoto, setActivePhoto] = useState(0);
   const [media, setMedia] = useState(mediaProp);
 
   useEffect(() => {
@@ -101,49 +101,18 @@ export function VenueMediaSection({
     <section>
       <h3 className="mb-2 text-sm font-bold uppercase tracking-wider text-gold">Venue photos</h3>
         {photos.length > 0 ? (
-          <>
-            <div className="mb-3 overflow-hidden rounded-2xl border border-gold-soft/60 bg-blush/20">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={mediaSrc(photos[activePhoto] ?? photos[0])}
-                alt=""
-                className="aspect-[4/3] w-full object-cover"
-              />
-            </div>
-            <div className="mb-3 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {photos.map((p, i) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setActivePhoto(i)}
-                  className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 ${
-                    i === activePhoto ? "border-gold" : "border-transparent"
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={mediaSrc(p)} alt="" className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-            <div className="mb-3 flex flex-wrap gap-2">
-              {photos.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className="text-xs font-medium text-sage underline"
-                  onClick={() =>
+          <PhotoGallery
+            photos={photos}
+            onDelete={
+              venueId
+                ? (mediaId) =>
                     startTransition(async () => {
-                      if (!venueId) return;
-                      await deleteVenueMedia(p.id, venueId);
+                      await deleteVenueMedia(mediaId, venueId);
                       await refreshMedia();
                     })
-                  }
-                >
-                  Remove photo
-                </button>
-              ))}
-            </div>
-          </>
+                : undefined
+            }
+          />
         ) : (
           <p className="mb-3 rounded-xl bg-blush/30 px-3 py-6 text-center text-sm text-ink-muted">
             No photos yet — add pictures from your venue visit.
