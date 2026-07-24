@@ -43,9 +43,10 @@ When both are set, every page requires login. Share **only** `APP_PASSWORD` with
 
 ### Enable uploads on Vercel
 
-1. Vercel project → **Storage** → **Create Database** → **Blob**
-2. Connect it to this project (adds `BLOB_READ_WRITE_TOKEN` automatically)
-3. **Redeploy**
+1. Vercel project → **Storage** → **Create** → **Blob**
+2. When asked for access, choose **Public** (this app uploads with `access: "public"`). **You cannot change public/private after the store is created** — if you picked Private by mistake, create a new Blob store as Public and connect it to the project (updates `BLOB_READ_WRITE_TOKEN`).
+3. Connect the store to this project (adds `BLOB_READ_WRITE_TOKEN` automatically)
+4. **Redeploy**
 4. Update Turso schema (one time):
 
 ```bash
