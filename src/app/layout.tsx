@@ -23,14 +23,26 @@ const script = Great_Vibes({
 export const metadata: Metadata = {
   title: "Ahmad & Nour · Wedding",
   description: "Venues, budget, and planning for Ahmad and Nour's wedding in Amman",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "A & N" },
+  applicationName: "A & N Wedding",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "A & N",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#3d5c54",
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#3d5c54" },
+    { media: "(prefers-color-scheme: dark)", color: "#2a423c" },
+  ],
 };
 
 export const dynamic = "force-dynamic";

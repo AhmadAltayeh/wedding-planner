@@ -12,6 +12,7 @@ import {
   ListChecks,
   GitCompare,
   Settings,
+  CalendarDays,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ const links = [
   { href: "/vendors", label: "Vendors", icon: Store },
   { href: "/budget", label: "Budget", icon: Wallet },
   { href: "/tasks", label: "Tasks", icon: ListChecks },
+  { href: "/appointments", label: "Dates", icon: CalendarDays },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

@@ -21,7 +21,7 @@ export async function GET() {
     let hint = "Check Turso URL/token and redeploy.";
     if (message.includes("no such table")) {
       hint = "Tables missing on Turso. On your Mac: npm run db:push:turso -- wedding-planner";
-    } else if (message.includes("contactName") || message.includes("blobUrl") || message.includes("PlannerMedia")) {
+    } else if (message.includes("contactName") || message.includes("blobUrl") || message.includes("PlannerMedia") || message.includes("Appointment")) {
       hint =
         "Schema is behind the app. On your Mac: npm run db:migrate:turso (not turso shell < file.sql)";
     }

@@ -45,6 +45,21 @@ run "CREATE TABLE IF NOT EXISTS PlannerMedia (
   CONSTRAINT PlannerMedia_plannerId_fkey FOREIGN KEY (plannerId) REFERENCES Planner (id) ON DELETE CASCADE ON UPDATE CASCADE
 );"
 
+run "CREATE TABLE IF NOT EXISTS Appointment (
+  id TEXT NOT NULL PRIMARY KEY,
+  title TEXT NOT NULL,
+  startsAt DATETIME NOT NULL,
+  endsAt DATETIME,
+  location TEXT,
+  notes TEXT,
+  venueId TEXT,
+  plannerId TEXT,
+  vendorId TEXT,
+  remindMins INTEGER NOT NULL DEFAULT 60,
+  createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);"
+
 echo ""
 echo "Done. Venue.contactName:"
 turso db shell "$DB_NAME" "PRAGMA table_info(Venue);" | grep -i contactName || true

@@ -3,14 +3,16 @@ import { getSettings } from "@/lib/actions/settings";
 import { listVenues } from "@/lib/actions/venues";
 import { listPlanners } from "@/lib/actions/planners";
 import { listTasks } from "@/lib/actions/tasks";
+import { listUpcomingAppointments } from "@/lib/actions/appointments";
 import { CoupleHero } from "@/components/couple-hero";
 import { DatabaseSetupHelp } from "@/components/database-setup-help";
+import { InstallAppHint } from "@/components/install-app-hint";
 import { displayNames } from "@/lib/brand";
 import { Card, Badge, Button, SectionTitle } from "@/components/ui";
-import { formatJod } from "@/lib/utils";
+import { formatJod, formatDateTime } from "@/lib/utils";
 import { estimateVenueTotal } from "@/lib/venue-math";
 import { statusColor, statusLabel } from "@/lib/constants";
-import { Building2, MapPin } from "lucide-react";
+import { Building2, MapPin, CalendarDays } from "lucide-react";
 import { isProductionDatabaseConfigured } from "@/lib/prisma";
 
 export default async function HomePage() {
@@ -28,13 +30,15 @@ export default async function HomePage() {
   let venues;
   let planners;
   let tasks;
+  let upcomingAppointments;
 
   try {
-    [settings, venues, planners, tasks] = await Promise.all([
+    [settings, venues, planners, tasks, upcomingAppointments] = await Promise.all([
       getSettings(),
       listVenues(),
       listPlanners(),
       listTasks(),
+      listUpcomingAppointments(3),
     ]);
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
@@ -56,6 +60,8 @@ export default async function HomePage() {
     <div>
       <CoupleHero groom={groom} bride={bride} weddingDate={settings.weddingDate} />
 
+      <InstallAppHint className="mb-6" />
+
       <div className="grid grid-cols-2 gap-3">
         <Card className="border-sage/10 bg-gradient-to-br from-surface to-blush/30">
           <p className="text-[10px] font-bold uppercase tracking-widest text-gold">Guests</p>
@@ -74,6 +80,32 @@ export default async function HomePage() {
           <p className="stat-value mt-1 text-3xl text-ink">{openTasks}</p>
         </Card>
       </div>
+
+      {upcomingAppointments.length > 0 && (
+        <section className="mt-8">
+          <div className="mb-3 flex items-end justify-between gap-2">
+            <SectionTitle>Coming up</SectionTitle>
+            <Link href="/appointments" className="text-link text-sm">
+              All dates
+            </Link>
+          </div>
+          <ul className="space-y-2">
+            {upcomingAppointments.map((a) => (
+              <li key={a.id}>
+                <Link href="/appointments">
+                  <Card className="flex items-start gap-3 py-3 active:border-gold/60 active:bg-blush/20">
+                    <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-ink">{a.title}</p>
+                      <p className="text-sm text-ink-muted">{formatDateTime(a.startsAt)}</p>
+                    </div>
+                  </Card>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {shortlisted.length > 0 && (
         <section className="mt-10">

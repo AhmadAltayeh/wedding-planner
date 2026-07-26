@@ -63,6 +63,13 @@ export const TASK_CATEGORIES = [
   { value: "general", label: "General" },
 ] as const;
 
+export const APPOINTMENT_REMIND_OPTIONS = [
+  { value: 0, label: "At meeting time" },
+  { value: 15, label: "15 min before" },
+  { value: 60, label: "1 hour before" },
+  { value: 1440, label: "1 day before" },
+] as const;
+
 export function statusLabel(value: string): string {
   return STATUS_OPTIONS.find((s) => s.value === value)?.label ?? value;
 }

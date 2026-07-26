@@ -55,3 +55,25 @@ export function formatDateWithShortDay(d: Date | string | null | undefined): str
     year: "numeric",
   });
 }
+
+/** e.g. "Fri 12 Jul 2026, 3:30 PM" */
+export function formatDateTime(d: Date | string | null | undefined): string {
+  if (!d) return "—";
+  const date = typeof d === "string" ? new Date(d) : d;
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/** Value for `<input type="datetime-local" />` in local time */
+export function toDatetimeLocalValue(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
